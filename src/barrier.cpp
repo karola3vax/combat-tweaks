@@ -14,7 +14,8 @@
 #include <gameentitysystem.h>
 #include <engine2/inetworkgameserver.h>
 #include <engine2/inetworkserverservice.h>
-#include <engine2/ivengineserver2.h>
+#include <tier0/convar.h>
+#include <tier0/icvar.h>
 #include <variant.h>
 
 #include <algorithm>
@@ -72,7 +73,6 @@ config::Settings::AntiRush settings;
 std::string zones_path;
 anti_rush::Zones all_zones;
 INetworkServerService *network = nullptr;
-IVEngineServer2 *engine = nullptr;
 std::string map;
 std::vector<anti_rush::Box> boxes; // for the current map
 struct Beam
@@ -393,8 +393,21 @@ void ShowNotes(void *rules, float now, float round_time)
 	}
 }
 
-// Health off a player who keeps pushing into the barrier. A lethal amount kills them through the
-// game's own "kill" command (a suicide), unless the config keeps them at 1 health.
+// Runs the game's own "kill" console command as if the player had typed it: a suicide, scored as one.
+// IVEngineServer2::ClientCommand only asks the player's game to run it, which it did not do.
+bool Kill(int slot)
+{
+	if (!g_pCVar) return false;
+	ConCommandRef kill = g_pCVar->FindConCommand("kill");
+	if (!kill.IsValidRef()) return false;
+	CCommand args;
+	args.Tokenize("kill");
+	g_pCVar->DispatchConCommand(kill, CCommandContext(CT_FIRST_SPLITSCREEN_CLIENT, CPlayerSlot(slot)), args);
+	return true;
+}
+
+// Health off a player who keeps pushing into the barrier. A lethal amount kills them (a suicide),
+// unless the config keeps them at 1 health.
 void Hurt(int slot, CEntityInstance *pawn, Rusher &rusher, float dt)
 {
 	if (settings.damage_per_second <= 0) return;
@@ -403,11 +416,7 @@ void Hurt(int slot, CEntityInstance *pawn, Rusher &rusher, float dt)
 	if (damage <= 0) return;
 	rusher.damage_owed -= static_cast<float>(damage);
 	int &health = schema::Field<int>(pawn, f.health);
-	if (health - damage <= 0 && settings.damage_can_kill && engine)
-	{
-		engine->ClientCommand(CPlayerSlot(slot), "kill");
-		return;
-	}
+	if (health - damage <= 0 && settings.damage_can_kill && Kill(slot)) return;
 	health = std::max(health - damage, 1);
 	NetworkStateChangedData data(static_cast<uint32>(f.health));
 	pawn->NetworkStateChanged(data);
@@ -433,7 +442,6 @@ bool Init(CSchemaSystemTypeScope *scope, const void *server_module_address, INet
 {
 	network = network_service;
 	zones_path = path;
-	engine = static_cast<IVEngineServer2 *>(g_SMAPI->GetEngineFactory()(SOURCE2ENGINETOSERVER_INTERFACE_VERSION, nullptr));
 	const auto segments = module::Segments(server_module_address);
 	create_entity = reinterpret_cast<decltype(create_entity)>(module::FindUnique(segments, kCreateEntity));
 	dispatch_spawn = reinterpret_cast<decltype(dispatch_spawn)>(module::FindUnique(segments, kDispatchSpawn));
