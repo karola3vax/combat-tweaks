@@ -13,10 +13,15 @@ compiler = plugin.compiler
 # The SDK's network headers include generated protobuf code.
 protobuf = builder.tools.Protoc(protoc=config.sdk_target.protoc, sources=[
   os.path.join(sdk['path'], 'common', 'network_connection.proto'),
+  os.path.join(sdk['path'], 'common', 'valveextensions.proto'),
+  os.path.join(sdk['path'], 'common', 'networkbasetypes.proto'),
+  # CUserMessageTextMsg: the anti-rush chat message.
+  os.path.join(sdk['path'], 'game', 'shared', 'usermessages.proto'),
 ])
 protobuf.protoc.includes += [
   os.path.join(sdk['path'], 'thirdparty', 'protobuf-3.21.8', 'src'),
   os.path.join(sdk['path'], 'common'),
+  os.path.join(sdk['path'], 'game', 'shared'),
 ]
 plugin.custom = [protobuf]
 compiler.cxxincludes += [

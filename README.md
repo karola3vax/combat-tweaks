@@ -9,6 +9,7 @@ Metamod plugin for CS2 servers. It applies to all players and has no commands. T
 | Shorter bullet decals | Sets `r_decals_overide_fadestarttime_params` to 0. Decals still appear, then fade over about 3 seconds |
 | No ragdolls | Sets a dead pawn's `m_clrRender` alpha to 0 and `m_nRenderMode` to `kRenderNone`, and restores both on respawn |
 | Anti-rush barrier | Draws a faint grey `beam` outline around each box (full red while a player is against it) in `addons/no_hit_effects/anti_rush.ini`, and players stop at it like a wall, until either team is down to one living player or `unlock_seconds` (default 60) have passed since freeze time ended. Off during warmup |
+| Rusher callout | A player who keeps walking into a locked barrier for 0.5 seconds is announced once per round in chat (`[ANTI-RUSH] Player X tried to rush in a blocked zone.`, CT names light blue, T names yellow) and glows red for 5 seconds, seen by everyone through walls. The glow is a hidden copy of the player's model, as public ESP plugins do it, because CS2 draws no glow on player pawns |
 
 The fade setting also shortens blood and scorch marks; blood pops out at 3 seconds instead of fading. A server cannot stop bullet holes from appearing, because each player's game paints its own.
 
@@ -16,7 +17,7 @@ These ragdoll methods failed in live tests with `sv_cheats` on or off: `DFLAG_RE
 
 Settings are checked once a second, because map changes and game mode configs write them back. `meta unload` restores the original values and flags.
 
-Field offsets come from CS2's schema at load, and the plugin refuses to load if a field or convar is gone. The anti-rush barrier also needs three signatures (`CreateEntityByName`, `DispatchSpawn`, `UTIL_Remove`, checked on build 2000942). If a CS2 update moves one, only the barrier turns off, with a console message.
+Field offsets come from CS2's schema at load, and the plugin refuses to load if a field or convar is gone. The anti-rush barrier also needs three signatures (`CreateEntityByName`, `DispatchSpawn`, `UTIL_Remove`), and the rusher glow a fourth (`AcceptInput`), all checked on build 2000942. If a CS2 update moves one, only that part turns off, with a console message.
 
 The wall works by cancelling movement into the box through `m_vecAbsVelocity`, and it also stops players in noclip.
 

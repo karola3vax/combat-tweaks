@@ -39,6 +39,9 @@ bool Locked(float seconds_since_round_start, int alive_t, int alive_ct, int unlo
 // player eases back out at `eject_rate` units per second for each unit of overlap.
 Vec Block(const Box &box, const Vec &position, const Vec &velocity, float eject_rate);
 
+// True when a player overlapping the box is moving into it through the nearest side wall.
+bool MovingIn(const Box &box, const Vec &position, const Vec &velocity);
+
 // The 12 edges of the box, as start and end points, for drawing.
 std::array<std::array<Vec, 2>, 12> Edges(const Box &box);
 

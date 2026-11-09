@@ -47,6 +47,11 @@ int main()
 	v = Block(box, {0, 45, 10}, {0, -100, 0}, 10);
 	assert(v[1] == 50 && v[0] == 0);
 
+	assert(MovingIn(box, {-95, 0, 10}, {250, 0, 0}));     // walking into the -x side
+	assert(!MovingIn(box, {-95, 0, 10}, {-250, 0, 0}));   // walking away
+	assert(!MovingIn(box, {-95, 0, 10}, {0, 250, 0}));    // sliding along it
+	assert(MovingIn(box, {0, 45, 10}, {0, -100, 0}));     // into the +y side
+
 	const auto edges = Edges(box);
 	for (const auto &edge : edges)
 	{

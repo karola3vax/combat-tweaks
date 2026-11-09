@@ -60,9 +60,19 @@ bool Locked(float seconds_since_round_start, int alive_t, int alive_ct, int unlo
 	return seconds_since_round_start < static_cast<float>(unlock_seconds) && alive_t > 1 && alive_ct > 1;
 }
 
-Vec Block(const Box &box, const Vec &position, const Vec &velocity, float eject_rate)
+namespace
 {
-	// Nearest of the four side walls: that is the side the player came in from.
+
+struct Wall
+{
+	int axis;    // 0 = x, 1 = y
+	float sign;  // outward direction along the axis
+	float depth; // how far inside the player is
+};
+
+// Nearest of the four side walls: that is the side the player came in from.
+Wall NearestWall(const Box &box, const Vec &position)
+{
 	int axis = 0;
 	float sign = -1.0f;
 	float nearest = position[0] - box.min[0];
@@ -75,9 +85,23 @@ Vec Block(const Box &box, const Vec &position, const Vec &velocity, float eject_
 			axis = side / 2;
 			sign = side % 2 == 0 ? -1.0f : 1.0f;
 		}
+	return {axis, sign, nearest};
+}
+
+} // namespace
+
+Vec Block(const Box &box, const Vec &position, const Vec &velocity, float eject_rate)
+{
+	const Wall wall = NearestWall(box, position);
 	Vec result = velocity;
-	result[axis] = sign * std::max(nearest * eject_rate, sign * velocity[axis]);
+	result[wall.axis] = wall.sign * std::max(wall.depth * eject_rate, wall.sign * velocity[wall.axis]);
 	return result;
+}
+
+bool MovingIn(const Box &box, const Vec &position, const Vec &velocity)
+{
+	const Wall wall = NearestWall(box, position);
+	return wall.sign * velocity[wall.axis] < -1.0f; // slower than 1 unit per second is standing still
 }
 
 std::array<std::array<Vec, 2>, 12> Edges(const Box &box)
