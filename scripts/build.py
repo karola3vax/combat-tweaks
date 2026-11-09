@@ -44,17 +44,17 @@ def main() -> None:
   run(*configure, cwd=build, env=env)
   run(python, "-c", "from ambuild2.run import cli_run; cli_run()", cwd=build, env=env)
 
-  name = "no_hit_effects.dll" if args.platform == "windows" else "no_hit_effects.so"
-  binary = build / "no_hit_effects" / f"{args.platform}-x86_64" / name
+  name = "combat_tweaks.dll" if args.platform == "windows" else "combat_tweaks.so"
+  binary = build / "combat_tweaks" / f"{args.platform}-x86_64" / name
   if not binary.is_file() or binary.stat().st_size == 0:
     raise SystemExit(f"plugin binary was not produced: {binary}")
-  # Release layout: both platforms share addons/no_hit_effects/bin; Metamod adds the extension.
+  # Release layout: both platforms share addons/combat_tweaks/bin; Metamod adds the extension.
   stage = ROOT / "dist" / "addons"
-  (stage / "no_hit_effects" / "bin").mkdir(parents=True, exist_ok=True)
+  (stage / "combat_tweaks" / "bin").mkdir(parents=True, exist_ok=True)
   (stage / "metamod").mkdir(parents=True, exist_ok=True)
-  shutil.copy2(binary, stage / "no_hit_effects" / "bin" / name)
-  shutil.copy2(ROOT / "configs" / "no_hit_effects.vdf", stage / "metamod" / "no_hit_effects.vdf")
-  shutil.copy2(ROOT / "configs" / "anti_rush.ini", stage / "no_hit_effects" / "anti_rush.ini")
+  shutil.copy2(binary, stage / "combat_tweaks" / "bin" / name)
+  shutil.copy2(ROOT / "configs" / "combat_tweaks.vdf", stage / "metamod" / "combat_tweaks.vdf")
+  shutil.copy2(ROOT / "configs" / "anti_rush.ini", stage / "combat_tweaks" / "anti_rush.ini")
   print(f"Built {binary}")
 
 

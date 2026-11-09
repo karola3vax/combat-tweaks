@@ -191,9 +191,9 @@ void LoadConfig()
 	std::vector<std::string> errors;
 	const std::string text = ReadFile(config_path);
 	config = anti_rush::ParseConfig(text, &errors);
-	if (text.empty()) META_CONPRINTF("[NO_HIT_EFFECTS] Could not read %s; no anti-rush barriers.\n", config_path.c_str());
+	if (text.empty()) META_CONPRINTF("[COMBAT_TWEAKS] Could not read %s; no anti-rush barriers.\n", config_path.c_str());
 	for (const std::string &line : errors)
-		META_CONPRINTF("[NO_HIT_EFFECTS] Skipped bad line in %s, %s\n", config_path.c_str(), line.c_str());
+		META_CONPRINTF("[COMBAT_TWEAKS] Skipped bad line in %s, %s\n", config_path.c_str(), line.c_str());
 }
 
 void RemoveBeams()
@@ -374,7 +374,7 @@ void Announce(CEntityInstance *controller, std::uint8_t team)
 		events->PostEventAbstract(0, false, -1, nullptr, type, data, 0, BUF_RELIABLE); // -1, null: every client
 	}
 	if (data) messages->DeallocateNetMessageAbstract(type, data);
-	META_CONPRINTF("[NO_HIT_EFFECTS] Anti-rush: %s tried to rush.\n", name.c_str());
+	META_CONPRINTF("[COMBAT_TWEAKS] Anti-rush: %s tried to rush.\n", name.c_str());
 }
 
 } // namespace
@@ -385,13 +385,13 @@ bool Init(CSchemaSystemTypeScope *scope, const void *server_module_address, INet
 	network = network_service;
 	messages = static_cast<INetworkMessages *>(g_SMAPI->GetEngineFactory()(NETWORKMESSAGES_INTERFACE_VERSION, nullptr));
 	events = static_cast<IGameEventSystem *>(g_SMAPI->GetEngineFactory()(GAMEEVENTSYSTEM_INTERFACE_VERSION, nullptr));
-	if (!messages || !events) META_CONPRINTF("[NO_HIT_EFFECTS] Anti-rush cannot send chat messages on this CS2 version.\n");
+	if (!messages || !events) META_CONPRINTF("[COMBAT_TWEAKS] Anti-rush cannot send chat messages on this CS2 version.\n");
 	const auto segments = ModuleSegments(server_module_address);
 	create_entity = reinterpret_cast<decltype(create_entity)>(FindUnique(segments, kCreateEntity));
 	dispatch_spawn = reinterpret_cast<decltype(dispatch_spawn)>(FindUnique(segments, kDispatchSpawn));
 	remove_entity = reinterpret_cast<decltype(remove_entity)>(FindUnique(segments, kRemoveEntity));
 	accept_input = reinterpret_cast<decltype(accept_input)>(FindUnique(segments, kAcceptInput));
-	if (!accept_input) META_CONPRINTF("[NO_HIT_EFFECTS] Anti-rush glow is off: a CS2 update moved AcceptInput.\n");
+	if (!accept_input) META_CONPRINTF("[COMBAT_TWEAKS] Anti-rush glow is off: a CS2 update moved AcceptInput.\n");
 	if (!create_entity || !dispatch_spawn || !remove_entity)
 	{
 		error = std::string("a CS2 update moved a function it needs (") + (!create_entity ? "CreateEntityByName " : "")
@@ -463,7 +463,7 @@ void Frame()
 		const auto found = config.boxes.find(map);
 		boxes = found == config.boxes.end() ? std::vector<anti_rush::Box> {} : found->second;
 		last_touch.assign(boxes.size(), -1000.0f);
-		META_CONPRINTF("[NO_HIT_EFFECTS] Map \"%s\": %d anti-rush barrier(s).\n", map.c_str(), static_cast<int>(boxes.size()));
+		META_CONPRINTF("[COMBAT_TWEAKS] Map \"%s\": %d anti-rush barrier(s).\n", map.c_str(), static_cast<int>(boxes.size()));
 	}
 	if (boxes.empty()) return;
 
@@ -499,7 +499,7 @@ void Frame()
 	if (locked != was_locked)
 	{
 		was_locked = locked;
-		META_CONPRINTF("[NO_HIT_EFFECTS] Anti-rush %s (T alive %d, CT alive %d, round time %.1f s).\n",
+		META_CONPRINTF("[COMBAT_TWEAKS] Anti-rush %s (T alive %d, CT alive %d, round time %.1f s).\n",
 			locked ? "locked" : "unlocked", alive[2], alive[3],
 			rules ? globals->curtime - schema::Field<float>(rules, f.round_start) : -1.0f);
 	}

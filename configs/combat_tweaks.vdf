@@ -1,0 +1,5 @@
+"Metamod Plugin"
+{
+	"alias"	"combat_tweaks"
+	"file"	"addons/combat_tweaks/bin/combat_tweaks"
+}

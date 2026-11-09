@@ -2,7 +2,7 @@
 
 #include "barrier.h"
 #include "schema.h"
-#ifdef NO_HIT_EFFECTS_TRACE
+#ifdef COMBAT_TWEAKS_TRACE
 #include "trace.h"
 #endif
 
@@ -111,15 +111,15 @@ void ApplySettings()
 
 } // namespace
 
-NoHitEffects g_NoHitEffects;
-PLUGIN_EXPOSE(NoHitEffects, g_NoHitEffects);
+CombatTweaks g_CombatTweaks;
+PLUGIN_EXPOSE(CombatTweaks, g_CombatTweaks);
 
-NoHitEffects::NoHitEffects()
-	: game_frame_(&IServerGameDLL::GameFrame, this, nullptr, &NoHitEffects::OnGameFrame)
+CombatTweaks::CombatTweaks()
+	: game_frame_(&IServerGameDLL::GameFrame, this, nullptr, &CombatTweaks::OnGameFrame)
 {
 }
 
-bool NoHitEffects::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
+bool CombatTweaks::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
 	PLUGIN_SAVEVARS();
 	ISchemaSystem *schema_system = nullptr;
@@ -144,7 +144,7 @@ bool NoHitEffects::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, 
 			static_cast<int>(g_render_color_offset), static_cast<int>(g_render_mode_offset));
 		return false;
 	}
-#ifdef NO_HIT_EFFECTS_TRACE
+#ifdef COMBAT_TWEAKS_TRACE
 	if (!trace::Init(scope, error, maxlen)) return false;
 #endif
 
@@ -166,14 +166,14 @@ bool NoHitEffects::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, 
 	std::string barrier_error;
 	INetworkServerService *network_service = nullptr;
 	GET_V_IFACE_ANY(GetEngineFactory, network_service, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
-	if (!barrier::Init(scope, server_, network_service, std::string(ismm->GetBaseDir()) + "/addons/no_hit_effects/anti_rush.ini", barrier_error))
-		META_CONPRINTF("[NO_HIT_EFFECTS] Anti-rush is off: %s.\n", barrier_error.c_str());
+	if (!barrier::Init(scope, server_, network_service, std::string(ismm->GetBaseDir()) + "/addons/combat_tweaks/anti_rush.ini", barrier_error))
+		META_CONPRINTF("[COMBAT_TWEAKS] Anti-rush is off: %s.\n", barrier_error.c_str());
 	game_frame_.Add(server_);
-	META_CONPRINTF("[NO_HIT_EFFECTS] No Hit Effects %s loaded%s.\n", NO_HIT_EFFECTS_VERSION, late ? " late" : "");
+	META_CONPRINTF("[COMBAT_TWEAKS] Combat Tweaks %s loaded%s.\n", COMBAT_TWEAKS_VERSION, late ? " late" : "");
 	return true;
 }
 
-bool NoHitEffects::Unload(char *, size_t)
+bool CombatTweaks::Unload(char *, size_t)
 {
 	game_frame_.Remove(server_);
 	barrier::Shutdown();
@@ -193,7 +193,7 @@ bool NoHitEffects::Unload(char *, size_t)
 	return true;
 }
 
-KHook::Return<void> NoHitEffects::OnGameFrame(IServerGameDLL *, bool simulating, bool, bool)
+KHook::Return<void> CombatTweaks::OnGameFrame(IServerGameDLL *, bool simulating, bool, bool)
 {
 	if (!simulating) return {KHook::Action::Ignore};
 	// Each frame rather than on spawn: a new pawn starts without the flag, and this also covers a late load.
@@ -202,7 +202,7 @@ KHook::Return<void> NoHitEffects::OnGameFrame(IServerGameDLL *, bool simulating,
 		CEntityInstance *pawn = Pawn(slot);
 		if (!pawn) continue;
 		UpdateBody(g_bodies[slot], pawn, schema::Field<std::uint8_t>(pawn, g_life_state_offset) != kLifeAlive);
-#ifdef NO_HIT_EFFECTS_TRACE
+#ifdef COMBAT_TWEAKS_TRACE
 		trace::Frame(slot, pawn);
 		if (slot % 2 != 0) continue; // odd slots keep the normal slowdown, as the control group
 #endif
@@ -210,7 +210,7 @@ KHook::Return<void> NoHitEffects::OnGameFrame(IServerGameDLL *, bool simulating,
 		if ((flags & kNoTagging) == 0) flags |= kNoTagging;
 	}
 	barrier::Frame();
-#ifndef NO_HIT_EFFECTS_TRACE // the trace build leaves the settings alone so a test can compare values
+#ifndef COMBAT_TWEAKS_TRACE // the trace build leaves the settings alone so a test can compare values
 	// Map changes and game mode configs write these back (Valve's deathmatch config sets the decal one).
 	const auto now = Clock::now();
 	if (now >= next_settings_check_)
