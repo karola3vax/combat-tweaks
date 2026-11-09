@@ -20,6 +20,6 @@
   "zone_list_item": "{admin_prefix} {number}: {from} - {to}",
   "help": "{admin_prefix} !ct status | zone | reload",
   "help_zone": "{admin_prefix} !ct zone [save | cancel | list | remove N]",
-  "rush_center": "<font class='fontWeight-Bold' color='#ff4040'>ANTI-RUSH</font><br>Öffnet in {seconds}s<br>",
-  "rush_center_wait": "<font class='fontWeight-Bold' color='#ff4040'>ANTI-RUSH</font><br>Öffnet beim letzten Spieler<br>"
+  "rush_center": "<span class='fontSize-l'><span color='#FF0000'>[ANTI-RUSH]</span><br><span color='#FFFFFF'>Öffnet in {seconds}s</span></span><br>",
+  "rush_center_wait": "<span class='fontSize-l'><span color='#FF0000'>[ANTI-RUSH]</span><br><span color='#FFFFFF'>Öffnet beim letzten Spieler</span></span><br>"
 }

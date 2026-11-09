@@ -35,7 +35,7 @@ struct Settings
 		Rgba glow_color_t {255, 170, 30, 255};  // orange
 		Rgba glow_color_ct {60, 150, 255, 255}; // blue
 		bool center_message = true;             // a private center-screen note to the rusher
-		float center_seconds = 3.0f;
+		float center_seconds = 5.0f;
 	} anti_rush;
 
 	std::vector<std::uint64_t> admins; // SteamID64s allowed to use !ct commands

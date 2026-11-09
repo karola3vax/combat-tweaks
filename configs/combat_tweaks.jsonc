@@ -45,8 +45,9 @@
     "glow_color_ct": [60, 150, 255],
 
     // Show the rusher a private note in the middle of their screen, with the time until it opens.
+    // It stays while they keep pushing, then this many seconds more.
     "center_message": true,
-    "center_seconds": 3
+    "center_seconds": 5
   },
 
   // SteamID64s of players allowed to use !ct commands (zone editor, status, reload).

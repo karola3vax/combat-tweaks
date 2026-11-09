@@ -91,7 +91,7 @@ Barriers reach a little below the lower corner and 200 units above the higher on
 | `anti_rush.glow_color_t` | `[255, 170, 30]` | Glow color for terrorists |
 | `anti_rush.glow_color_ct` | `[60, 150, 255]` | Glow color for counter-terrorists |
 | `anti_rush.center_message` | `true` | Show the rusher a private note in the middle of their screen |
-| `anti_rush.center_seconds` | `3` | How long that note stays |
+| `anti_rush.center_seconds` | `5` | How long that note stays after the rusher stops pushing |
 | `admins` | `[]` | SteamID64s, in quotes, allowed to use `ct` in game |
 | `update_check` | `true` | Print a console line when a newer release is out |
 

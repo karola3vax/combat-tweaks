@@ -575,6 +575,8 @@ void Frame()
 			break;
 		}
 		rusher.pushing = pushing ? rusher.pushing + dt : 0.0f;
+		// A caught rusher who keeps pushing keeps the note up; it then lingers for center_seconds.
+		if (rusher.caught && pushing && settings.center_message) rusher.center_until = globals->curtime + settings.center_seconds;
 		if (!settings.callout || rusher.caught || rusher.pushing < settings.callout_seconds) continue;
 		rusher.caught = true;
 		Announce(Controller(slot));
