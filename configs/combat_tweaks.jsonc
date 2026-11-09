@@ -50,7 +50,7 @@
     "center_message": true,
     "center_seconds": 5,
 
-    // Health a player loses each second while pushing into the barrier. 0 turns it off.
+    // Health a player loses each second while pushing into the barrier, as one hit every half second. 0 turns it off.
     "damage_per_second": 50,
 
     // Whether that damage may kill (the death counts as a suicide). If false, it stops at 1 health.

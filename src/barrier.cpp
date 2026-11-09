@@ -41,6 +41,7 @@ constexpr float kTouchHold = 0.5f;        // seconds a box stays lit after the l
 constexpr std::uint8_t kRenderTransAlpha = 1;
 constexpr std::uint8_t kRenderNone = 2;
 constexpr int kGlowAlways = 3;            // m_iGlowType: through walls
+constexpr float kHitInterval = 0.5f;     // rush damage comes as one hit per this many seconds of pushing
 constexpr float kZoneFloor = 16.0f;       // editor zones reach this far below the lower corner (stairs, slopes)
 constexpr float kZoneHeight = 200.0f;     // ...and this far above the higher one, so jumping can't clear them
 
@@ -93,7 +94,7 @@ struct Rusher
 	CEntityHandle relay, glow; // the model copies that show the glow
 	float glow_until = 0.0f;
 	float center_until = 0.0f; // the private note shows until then
-	float damage_owed = 0.0f;  // fractions of a health point not taken yet
+	float damage_owed = 0.0f;  // seconds of pushing towards the next damage hit
 };
 std::array<Rusher, 64> rushers;
 bool set_game_restart = false; // this plugin turned m_bGameRestart on, for the note
@@ -411,10 +412,11 @@ bool Kill(int slot)
 void Hurt(int slot, CEntityInstance *pawn, Rusher &rusher, float dt)
 {
 	if (settings.damage_per_second <= 0) return;
-	rusher.damage_owed += settings.damage_per_second * dt;
-	const int damage = static_cast<int>(rusher.damage_owed);
-	if (damage <= 0) return;
-	rusher.damage_owed -= static_cast<float>(damage);
+	// Felt hits instead of 1 health per tick.
+	rusher.damage_owed += dt;
+	if (rusher.damage_owed < kHitInterval) return;
+	rusher.damage_owed -= kHitInterval;
+	const int damage = std::max(static_cast<int>(settings.damage_per_second * kHitInterval + 0.5f), 1);
 	int &health = schema::Field<int>(pawn, f.health);
 	if (health - damage <= 0 && settings.damage_can_kill && Kill(slot)) return;
 	health = std::max(health - damage, 1);
@@ -592,6 +594,7 @@ void Frame()
 		if (!pawn) continue;
 		Rusher &rusher = rushers[slot];
 		bool pushing = false;
+		bool touching = false;
 		for (std::size_t index = 0; index < boxes.size(); ++index)
 		{
 			anti_rush::Box box = boxes[index];
@@ -601,6 +604,7 @@ void Frame()
 				box.max[axis] += kPlayerHalfWidth;
 			}
 			if (!anti_rush::Inside(box, position)) continue;
+			touching = true;
 			last_touch[index] = globals->curtime;
 			float *velocity = &schema::Field<float>(pawn, f.velocity);
 			pushing = anti_rush::MovingIn(box, position, {velocity[0], velocity[1], velocity[2]});
@@ -610,8 +614,9 @@ void Frame()
 			break;
 		}
 		rusher.pushing = pushing ? rusher.pushing + dt : 0.0f;
+		// Pushing flickers from tick to tick against the wall; only leaving the barrier starts the count over.
 		if (pushing) Hurt(slot, pawn, rusher, dt);
-		else rusher.damage_owed = 0.0f;
+		else if (!touching) rusher.damage_owed = 0.0f;
 		// A caught rusher who keeps pushing keeps the note up; it then lingers for center_seconds.
 		if (rusher.caught && pushing && settings.center_message) rusher.center_until = globals->curtime + settings.center_seconds;
 		if (!settings.callout || rusher.caught || rusher.pushing < settings.callout_seconds) continue;

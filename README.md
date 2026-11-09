@@ -92,7 +92,7 @@ Barriers reach a little below the lower corner and 200 units above the higher on
 | `anti_rush.glow_color_ct` | `[135, 180, 235, 100]` | Glow color for counter-terrorists |
 | `anti_rush.center_message` | `true` | Show the rusher a private note in the middle of their screen |
 | `anti_rush.center_seconds` | `5` | How long that note stays after the rusher stops pushing |
-| `anti_rush.damage_per_second` | `50` | Health a player loses each second while pushing into the barrier (`0`: off) |
+| `anti_rush.damage_per_second` | `50` | Health a player loses each second while pushing into the barrier, as one hit every half second (`0`: off) |
 | `anti_rush.damage_can_kill` | `true` | Whether that damage may kill; the death counts as a suicide. If `false`, it stops at 1 health |
 | `admins` | `[]` | SteamID64s, in quotes, allowed to use `ct` in game |
 | `update_check` | `true` | Print a console line when a newer release is out |
