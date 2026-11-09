@@ -11,28 +11,34 @@ using namespace anti_rush;
 int main()
 {
 	std::vector<std::string> errors;
-	const Config config = ParseConfig("# comment\n"
-									  "unlock_seconds 45\n"
-									  "aim_map 100 -50 0  -100 50 128   # corners in any order\n"
-									  "aim_map 1 2 3\n"
-									  "\n",
-		&errors);
-	assert(config.unlock_seconds == 45);
-	assert(config.boxes.at("aim_map").size() == 1);
-	const Box box = config.boxes.at("aim_map")[0];
+	const Zones zones = ParseZones("// comment\n"
+								   "{ \"aim_map\": [ { \"from\": [100, -50, 0], \"to\": [-100, 50, 128] },  // corners in any order\n"
+								   "                  { \"from\": [1, 2] , \"to\": [1, 2, 3] } ] }",
+		errors);
+	assert(zones.at("aim_map").size() == 1);
+	const Box box = zones.at("aim_map")[0];
 	assert(box.min[0] == -100 && box.max[0] == 100 && box.min[1] == -50 && box.max[2] == 128);
 	assert(errors.size() == 1);
-	assert(ParseConfig("unlock_seconds -5").unlock_seconds == 60);
+	errors.clear();
+	assert(ParseZones("{ broken", errors).empty() && errors.size() == 1);
+
+	// What the editor saves reads back the same.
+	errors.clear();
+	const Zones saved = ParseZones(FormatZones({{"aim_map", {box}}, {"empty_map", {}}}), errors);
+	assert(errors.empty() && saved.size() == 1 && saved.at("aim_map").size() == 1);
+	assert(saved.at("aim_map")[0].min == box.min && saved.at("aim_map")[0].max == box.max);
 
 	assert(Inside(box, {0, 0, 10}));
 	assert(!Inside(box, {0, 0, 200}));
 	assert(!Inside(box, {101, 0, 10}));
 
-	assert(Locked(10, 5, 5, 60));
-	assert(!Locked(60, 5, 5, 60));
-	assert(!Locked(10, 1, 5, 60));
-	assert(!Locked(10, 5, 1, 60));
-	assert(!Locked(10, 5, 0, 60));
+	assert(Locked(10, 5, 5, 60, 1));
+	assert(!Locked(60, 5, 5, 60, 1));
+	assert(!Locked(10, 1, 5, 60, 1));
+	assert(!Locked(10, 5, 1, 60, 1));
+	assert(!Locked(10, 5, 0, 60, 1));
+	assert(Locked(500, 5, 5, 0, 1));  // no timer
+	assert(!Locked(10, 2, 5, 60, 2)); // two left counts as few
 
 	// 10 units in from the -x side, walking +x: inward speed gone, eased out at 10 * 10, y and z kept.
 	Vec v = Block(box, {-90, 0, 10}, {250, 30, 5}, 10);

@@ -19,20 +19,22 @@ struct Box
 	Vec max {};
 };
 
-struct Config
-{
-	int unlock_seconds = 60;
-	std::unordered_map<std::string, std::vector<Box>> boxes; // by map name
-};
+using Zones = std::unordered_map<std::string, std::vector<Box>>; // by map name
 
-// Lines: `unlock_seconds <n>` or `<map> <x1> <y1> <z1> <x2> <y2> <z2>` (any two opposite corners).
-// `#` starts a comment. Bad lines are skipped and reported in `errors`.
-Config ParseConfig(std::string_view text, std::vector<std::string> *errors = nullptr);
+// The box between any two opposite corners.
+Box MakeBox(const Vec &a, const Vec &b);
+
+// zones.jsonc: { "<map>": [ { "from": [x, y, z], "to": [x, y, z] }, ... ], ... }. Comments are allowed.
+// Bad entries are skipped and reported in `errors`. Never throws.
+Zones ParseZones(std::string_view text, std::vector<std::string> &errors);
+
+// zones.jsonc text for the zones, with a short header; ParseZones reads it back.
+std::string FormatZones(const Zones &zones);
 
 bool Inside(const Box &box, const Vec &point);
 
-// Locked until the timer ends or either team is down to one living player.
-bool Locked(float seconds_since_round_start, int alive_t, int alive_ct, int unlock_seconds);
+// Locked until the timer ends (0: no timer) or either team is down to `players_left` living players.
+bool Locked(float seconds_since_round_start, int alive_t, int alive_ct, int unlock_seconds, int players_left);
 
 // Velocity that makes the box act like a wall for a player overlapping it: movement into the
 // nearest side (x or y; height is left alone) is cancelled, sliding along it is kept, and the

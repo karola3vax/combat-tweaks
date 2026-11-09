@@ -1,0 +1,53 @@
+// Combat Tweaks settings. Changes apply on map change, or at once with "!ct reload".
+// Chat messages and their colors are in the translations folder, one file per language.
+{
+  // Hits don't kick your aim (armored or not).
+  "no_aimpunch": true,
+
+  // Hits don't slow you down.
+  "no_slowdown": true,
+
+  // Dead bodies disappear at once instead of lying around.
+  "hide_ragdolls": true,
+
+  // Bullet holes, blood and scorch marks fade after about 3 seconds.
+  "short_decals": true,
+
+  "anti_rush": {
+    // Barriers from zones.jsonc block the map's middle at the start of each round.
+    "enabled": true,
+
+    // The barrier opens this many seconds after freeze time ends. 0: no timer, only the players-left rule.
+    "unlock_seconds": 60,
+
+    // ...or as soon as either team has this many players alive, or fewer.
+    "unlock_players_left": 1,
+
+    // Tell players in chat when the barrier closes and opens.
+    "round_messages": true,
+
+    // Barrier lines: [red, green, blue, alpha]. Alpha 0 hides them; 255 is solid.
+    "line_color": [120, 120, 120, 160],
+
+    // Line color while a player is against the barrier.
+    "touched_color": [255, 0, 0, 255],
+
+    // Announce players who keep walking into the barrier, once per round.
+    "callout": true,
+
+    // Seconds of walking into the barrier before it counts as a rush attempt.
+    "callout_seconds": 0.5,
+
+    // Make the rusher glow, seen by everyone through walls.
+    "glow": true,
+    "glow_seconds": 5,
+    "glow_color": [255, 0, 0]
+  },
+
+  // SteamID64s of players allowed to use !ct commands (zone editor, status, reload).
+  // The server console can always use "ct". Example: ["76561198000000000"]
+  "admins": [],
+
+  // Print a console line when a newer Combat Tweaks is out on GitHub.
+  "update_check": true
+}

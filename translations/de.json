@@ -1,0 +1,25 @@
+{
+  "_comment": "Combat Tweaks chat messages. Color tokens: {default} {red} {lightblue} {yellow} {lime} {grey}. {team} is the team color of the named player. Keep every {placeholder} when translating.",
+
+  "rush_prefix": "{red}[ANTI-RUSH]{default}",
+  "admin_prefix": "{lime}[Combat Tweaks]{default}",
+
+  "rush_attempt": "{rush_prefix} Spieler {team}{name}{default} hat versucht, in eine gesperrte Zone zu rushen.",
+  "barrier_locked": "{rush_prefix} Rushen ist gesperrt. Es öffnet in {seconds} Sekunden oder sobald ein Team nur noch einen Spieler hat.",
+  "barrier_unlocked": "{rush_prefix} Rushen ist jetzt erlaubt.",
+
+  "no_access": "{admin_prefix} Du hast keinen Zugriff auf diesen Befehl.",
+  "help": "{admin_prefix} Befehle: {lime}!ct status{default}, {lime}!ct zone{default}, {lime}!ct zone save{default}, {lime}!ct zone cancel{default}, {lime}!ct zone list{default}, {lime}!ct zone remove <number>{default}, {lime}!ct reload{default}.",
+  "must_be_alive": "{admin_prefix} Du musst am Leben sein, um eine Ecke zu setzen.",
+  "zone_corner1": "{admin_prefix} Erste Ecke gesetzt. Geh zur gegenüberliegenden Ecke und gib erneut {lime}!ct zone{default} ein.",
+  "zone_corner2": "{admin_prefix} Zweite Ecke gesetzt, die Box wird angezeigt. Gib {lime}!ct zone save{default} ein, um sie zu speichern, oder {lime}!ct zone cancel{default}, um sie zu verwerfen.",
+  "zone_saved": "{admin_prefix} Zone {number} für {map} gespeichert.",
+  "zone_cancelled": "{admin_prefix} Zone zeichnen abgebrochen.",
+  "zone_nothing": "{admin_prefix} Noch nichts zu speichern. Stell dich an die erste Ecke und gib {lime}!ct zone{default} ein.",
+  "zone_list_empty": "{admin_prefix} {map} hat keine Zonen.",
+  "zone_list_item": "{admin_prefix} Zone {number}: von {from} bis {to}.",
+  "zone_removed": "{admin_prefix} Zone {number} von {map} entfernt.",
+  "zone_not_found": "{admin_prefix} {map} hat keine Zone {number}.",
+  "reloaded": "{admin_prefix} Config, Zonen und Nachrichten neu geladen.",
+  "status_in_console": "{admin_prefix} Status in deiner Konsole ausgegeben."
+}

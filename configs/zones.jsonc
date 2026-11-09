@@ -1,0 +1,7 @@
+// Combat Tweaks anti-rush barriers, by map name. Two opposite corners per box, in world units.
+// Easiest to edit in game: "!ct zone" at each corner, then "!ct zone save".
+{
+  "aim_redline": [
+    { "from": [-1152, 421, 0], "to": [384, 444, 304] }
+  ]
+}

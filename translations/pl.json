@@ -1,0 +1,25 @@
+{
+  "_comment": "Combat Tweaks chat messages. Color tokens: {default} {red} {lightblue} {yellow} {lime} {grey}. {team} is the team color of the named player. Keep every {placeholder} when translating.",
+
+  "rush_prefix": "{red}[ANTI-RUSH]{default}",
+  "admin_prefix": "{lime}[Combat Tweaks]{default}",
+
+  "rush_attempt": "{rush_prefix} Gracz {team}{name}{default} próbował zrushować zablokowaną strefę.",
+  "barrier_locked": "{rush_prefix} Rush jest zablokowany. Odblokuje się za {seconds} s albo gdy w jednej z drużyn zostanie jeden gracz.",
+  "barrier_unlocked": "{rush_prefix} Rush jest odblokowany.",
+
+  "no_access": "{admin_prefix} Nie masz dostępu do tej komendy.",
+  "help": "{admin_prefix} Komendy: {lime}!ct status{default}, {lime}!ct zone{default}, {lime}!ct zone save{default}, {lime}!ct zone cancel{default}, {lime}!ct zone list{default}, {lime}!ct zone remove <number>{default}, {lime}!ct reload{default}.",
+  "must_be_alive": "{admin_prefix} Musisz żyć, żeby postawić róg.",
+  "zone_corner1": "{admin_prefix} Pierwszy róg ustawiony. Przejdź do przeciwległego rogu i wpisz ponownie {lime}!ct zone{default}.",
+  "zone_corner2": "{admin_prefix} Drugi róg ustawiony, strefa jest widoczna. Wpisz {lime}!ct zone save{default}, żeby ją zapisać, albo {lime}!ct zone cancel{default}, żeby ją odrzucić.",
+  "zone_saved": "{admin_prefix} Strefa {number} zapisana dla {map}.",
+  "zone_cancelled": "{admin_prefix} Rysowanie strefy anulowane.",
+  "zone_nothing": "{admin_prefix} Na razie nie ma czego zapisać. Stań w pierwszym rogu i wpisz {lime}!ct zone{default}.",
+  "zone_list_empty": "{admin_prefix} {map} nie ma stref.",
+  "zone_list_item": "{admin_prefix} Strefa {number}: od {from} do {to}.",
+  "zone_removed": "{admin_prefix} Strefa {number} usunięta z {map}.",
+  "zone_not_found": "{admin_prefix} {map} nie ma strefy {number}.",
+  "reloaded": "{admin_prefix} Config, strefy i wiadomości przeładowane.",
+  "status_in_console": "{admin_prefix} Status wypisany w twojej konsoli."
+}

@@ -1,0 +1,25 @@
+{
+  "_comment": "Combat Tweaks chat messages. Color tokens: {default} {red} {lightblue} {yellow} {lime} {grey}. {team} is the team color of the named player. Keep every {placeholder} when translating.",
+
+  "rush_prefix": "{red}[ANTI-RUSH]{default}",
+  "admin_prefix": "{lime}[Combat Tweaks]{default}",
+
+  "rush_attempt": "{rush_prefix} El jugador {team}{name}{default} intentó rushear una zona bloqueada.",
+  "barrier_locked": "{rush_prefix} El rush está bloqueado. Se abre en {seconds} segundos o cuando a un equipo le quede un solo jugador.",
+  "barrier_unlocked": "{rush_prefix} El rush está abierto.",
+
+  "no_access": "{admin_prefix} No tienes acceso a este comando.",
+  "help": "{admin_prefix} Comandos: {lime}!ct status{default}, {lime}!ct zone{default}, {lime}!ct zone save{default}, {lime}!ct zone cancel{default}, {lime}!ct zone list{default}, {lime}!ct zone remove <number>{default}, {lime}!ct reload{default}.",
+  "must_be_alive": "{admin_prefix} Tienes que estar vivo para poner una esquina.",
+  "zone_corner1": "{admin_prefix} Primera esquina puesta. Camina hasta la esquina opuesta y escribe {lime}!ct zone{default} otra vez.",
+  "zone_corner2": "{admin_prefix} Segunda esquina puesta, se muestra la caja. Escribe {lime}!ct zone save{default} para guardarla o {lime}!ct zone cancel{default} para descartarla.",
+  "zone_saved": "{admin_prefix} Zona {number} guardada para {map}.",
+  "zone_cancelled": "{admin_prefix} Dibujo de zona cancelado.",
+  "zone_nothing": "{admin_prefix} Todavía no hay nada que guardar. Ponte en la primera esquina y escribe {lime}!ct zone{default}.",
+  "zone_list_empty": "{admin_prefix} {map} no tiene zonas.",
+  "zone_list_item": "{admin_prefix} Zona {number}: de {from} a {to}.",
+  "zone_removed": "{admin_prefix} Zona {number} eliminada de {map}.",
+  "zone_not_found": "{admin_prefix} {map} no tiene la zona {number}.",
+  "reloaded": "{admin_prefix} Config, zonas y mensajes recargados.",
+  "status_in_console": "{admin_prefix} Estado mostrado en tu consola."
+}

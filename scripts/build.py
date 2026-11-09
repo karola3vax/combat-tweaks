@@ -54,7 +54,13 @@ def main() -> None:
   (stage / "metamod").mkdir(parents=True, exist_ok=True)
   shutil.copy2(binary, stage / "combat_tweaks" / "bin" / name)
   shutil.copy2(ROOT / "configs" / "combat_tweaks.vdf", stage / "metamod" / "combat_tweaks.vdf")
-  shutil.copy2(ROOT / "configs" / "anti_rush.ini", stage / "combat_tweaks" / "anti_rush.ini")
+  # The release ships these; an update must not overwrite a server's own copies (see README).
+  for name in ("combat_tweaks.jsonc", "zones.jsonc"):
+    shutil.copy2(ROOT / "configs" / name, stage / "combat_tweaks" / name)
+  translations = stage / "combat_tweaks" / "translations"
+  translations.mkdir(exist_ok=True)
+  for path in sorted((ROOT / "translations").glob("*.json")):
+    shutil.copy2(path, translations / path.name)
   print(f"Built {binary}")
 
 

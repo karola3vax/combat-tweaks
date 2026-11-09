@@ -1,0 +1,25 @@
+{
+  "_comment": "Combat Tweaks chat messages. Color tokens: {default} {red} {lightblue} {yellow} {lime} {grey}. {team} is the team color of the named player. Keep every {placeholder} when translating.",
+
+  "rush_prefix": "{red}[ANTI-RUSH]{default}",
+  "admin_prefix": "{lime}[Combat Tweaks]{default}",
+
+  "rush_attempt": "{rush_prefix} 玩家 {team}{name}{default} 试图 Rush 进封锁区域。",
+  "barrier_locked": "{rush_prefix} 现在禁止 Rush。{seconds} 秒后开放，或某一方只剩一名玩家时开放。",
+  "barrier_unlocked": "{rush_prefix} 现在可以 Rush 了。",
+
+  "no_access": "{admin_prefix} 你没有权限使用这个命令。",
+  "help": "{admin_prefix} 命令： {lime}!ct status{default}、{lime}!ct zone{default}、{lime}!ct zone save{default}、{lime}!ct zone cancel{default}、{lime}!ct zone list{default}、{lime}!ct zone remove <number>{default}、{lime}!ct reload{default}。",
+  "must_be_alive": "{admin_prefix} 你必须活着才能放置角点。",
+  "zone_corner1": "{admin_prefix} 已设置第一个角点。走到对角，再输入 {lime}!ct zone{default}。",
+  "zone_corner2": "{admin_prefix} 已设置第二个角点，区域框已显示。输入 {lime}!ct zone save{default} 保存，或输入 {lime}!ct zone cancel{default} 放弃。",
+  "zone_saved": "{admin_prefix} 已为 {map} 保存区域 {number}。",
+  "zone_cancelled": "{admin_prefix} 已取消绘制区域。",
+  "zone_nothing": "{admin_prefix} 还没有可以保存的内容。站到第一个角点，输入 {lime}!ct zone{default}。",
+  "zone_list_empty": "{admin_prefix} {map} 没有区域。",
+  "zone_list_item": "{admin_prefix} 区域 {number}：从 {from} 到 {to}。",
+  "zone_removed": "{admin_prefix} 已从 {map} 删除区域 {number}。",
+  "zone_not_found": "{admin_prefix} {map} 没有区域 {number}。",
+  "reloaded": "{admin_prefix} 配置、区域和消息已重新加载。",
+  "status_in_console": "{admin_prefix} 状态已输出到你的控制台。"
+}

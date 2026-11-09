@@ -2,50 +2,87 @@
 
 #include <algorithm>
 #include <cmath>
-#include <sstream>
+#include <cstdio>
+
+#include <nlohmann/json.hpp>
 
 namespace anti_rush
 {
 
-Config ParseConfig(std::string_view text, std::vector<std::string> *errors)
+Box MakeBox(const Vec &a, const Vec &b)
 {
-	Config config;
-	std::istringstream lines {std::string(text)};
-	std::string line;
-	for (int number = 1; std::getline(lines, line); ++number)
+	Box box;
+	for (int axis = 0; axis < 3; ++axis)
 	{
-		line = line.substr(0, line.find('#'));
-		std::istringstream words(line);
-		std::string first;
-		if (!(words >> first)) continue;
-		std::string rest;
-		if (first == "unlock_seconds")
-		{
-			int seconds = 0;
-			if (words >> seconds && seconds >= 0 && !(words >> rest))
-			{
-				config.unlock_seconds = seconds;
-				continue;
-			}
-		}
-		else
-		{
-			Vec a {}, b {};
-			if (words >> a[0] >> a[1] >> a[2] >> b[0] >> b[1] >> b[2] && !(words >> rest))
-			{
-				Box box;
-				for (int axis = 0; axis < 3; ++axis)
-				{
-					box.min[axis] = std::min(a[axis], b[axis]);
-					box.max[axis] = std::max(a[axis], b[axis]);
-				}
-				config.boxes[first].push_back(box);
-				continue;
-			}
-		}
-		if (errors) errors->push_back("line " + std::to_string(number) + ": " + line);
+		box.min[axis] = std::min(a[axis], b[axis]);
+		box.max[axis] = std::max(a[axis], b[axis]);
 	}
-	return config;
+	return box;
+}
+
+Zones ParseZones(std::string_view text, std::vector<std::string> &errors)
+{
+	using Json = nlohmann::json;
+	Zones zones;
+	const Json root = Json::parse(text, nullptr, false, true); // no exceptions, comments allowed
+	if (root.is_discarded() || !root.is_object())
+	{
+		errors.push_back("not valid JSON; check commas and quotes. No zones loaded");
+		return zones;
+	}
+	auto point = [](const Json &value, Vec &out) {
+		if (!value.is_array() || value.size() != 3) return false;
+		for (std::size_t axis = 0; axis < 3; ++axis)
+		{
+			if (!value[axis].is_number()) return false;
+			out[axis] = value[axis].get<float>();
+		}
+		return true;
+	};
+	for (const auto &[map, list] : root.items())
+	{
+		if (!list.is_array())
+		{
+			errors.push_back(map + ": must be a list of zones [ ... ]");
+			continue;
+		}
+		for (std::size_t i = 0; i < list.size(); ++i)
+		{
+			Vec from {}, to {};
+			if (list[i].is_object() && list[i].contains("from") && list[i].contains("to") && point(list[i]["from"], from)
+				&& point(list[i]["to"], to))
+				zones[map].push_back(MakeBox(from, to));
+			else
+				errors.push_back(map + " zone " + std::to_string(i + 1) + ": needs \"from\": [x, y, z] and \"to\": [x, y, z]");
+		}
+	}
+	return zones;
+}
+
+std::string FormatZones(const Zones &zones)
+{
+	std::vector<std::string> maps;
+	for (const auto &[map, boxes] : zones)
+		if (!boxes.empty()) maps.push_back(map);
+	std::sort(maps.begin(), maps.end());
+	auto number = [](float value) {
+		char text[32];
+		std::snprintf(text, sizeof(text), "%g", static_cast<double>(value));
+		return std::string(text);
+	};
+	auto point = [&](const Vec &v) { return "[" + number(v[0]) + ", " + number(v[1]) + ", " + number(v[2]) + "]"; };
+	std::string out = "// Combat Tweaks anti-rush barriers, by map name. Two opposite corners per box, in world units.\n"
+					  "// Easiest to edit in game: \"!ct zone\" at each corner, then \"!ct zone save\".\n{\n";
+	for (std::size_t m = 0; m < maps.size(); ++m)
+	{
+		out += "  \"" + maps[m] + "\": [\n";
+		const auto &boxes = zones.at(maps[m]);
+		for (std::size_t i = 0; i < boxes.size(); ++i)
+			out += "    { \"from\": " + point(boxes[i].min) + ", \"to\": " + point(boxes[i].max) + " }"
+				+ (i + 1 < boxes.size() ? ",\n" : "\n");
+		out += std::string("  ]") + (m + 1 < maps.size() ? ",\n" : "\n");
+	}
+	return out + "}\n";
 }
 
 bool Inside(const Box &box, const Vec &point)
@@ -55,9 +92,10 @@ bool Inside(const Box &box, const Vec &point)
 	return true;
 }
 
-bool Locked(float seconds_since_round_start, int alive_t, int alive_ct, int unlock_seconds)
+bool Locked(float seconds_since_round_start, int alive_t, int alive_ct, int unlock_seconds, int players_left)
 {
-	return seconds_since_round_start < static_cast<float>(unlock_seconds) && alive_t > 1 && alive_ct > 1;
+	const bool timer_running = unlock_seconds == 0 || seconds_since_round_start < static_cast<float>(unlock_seconds);
+	return timer_running && alive_t > players_left && alive_ct > players_left;
 }
 
 namespace

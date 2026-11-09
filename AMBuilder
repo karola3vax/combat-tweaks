@@ -15,7 +15,10 @@ protobuf = builder.tools.Protoc(protoc=config.sdk_target.protoc, sources=[
   os.path.join(sdk['path'], 'common', 'network_connection.proto'),
   os.path.join(sdk['path'], 'common', 'valveextensions.proto'),
   os.path.join(sdk['path'], 'common', 'networkbasetypes.proto'),
-  # CUserMessageTextMsg: the anti-rush chat message.
+  # CSVCMsg_GetCvarValue and its answer: each player's game language.
+  os.path.join(sdk['path'], 'common', 'source2_steam_stats.proto'),
+  os.path.join(sdk['path'], 'common', 'netmessages.proto'),
+  # CUserMessageTextMsg: chat and console lines.
   os.path.join(sdk['path'], 'game', 'shared', 'usermessages.proto'),
 ])
 protobuf.protoc.includes += [
@@ -26,6 +29,7 @@ protobuf.protoc.includes += [
 plugin.custom = [protobuf]
 compiler.cxxincludes += [
   os.path.join(root, 'src'),
+  os.path.join(root, 'third_party'),
   os.path.join(config.mms_root, 'core'),
   os.path.join(config.mms_root, 'third_party', 'khook', 'include'),
   os.path.join(builder.buildPath, 'combat_tweaks', '{}-{}'.format(compiler.target.platform, compiler.target.arch)),
@@ -35,6 +39,10 @@ if compiler.behavior == 'msvc':
   compiler.cflags += ['/MTd'] if builder.options.debug else ['/MT']
   compiler.defines += ['_CRT_SECURE_NO_WARNINGS', 'NOMINMAX']
   compiler.linkflags += ['/DYNAMICBASE', '/HIGHENTROPYVA', '/NXCOMPAT', '/DEBUG:NONE']
+  # steam_api64.dll is already loaded by the server; delay-loading keeps the plugin
+  # loadable before Steam is up (the update check uses Steam HTTP).
+  compiler.postlink += ['delayimp.lib']
+  compiler.linkflags += ['/DELAYLOAD:steam_api64.dll']
 else:
   compiler.cflags += ['-Wall', '-Wextra', '-pthread', '-msse4.1', '-fno-strict-aliasing', '-fPIC',
     '-fvisibility=hidden', '-fstack-protector-strong', '-O2']
@@ -54,6 +62,12 @@ plugin.sources += [
   os.path.join(root, 'src', 'plugin.cpp'),
   os.path.join(root, 'src', 'barrier.cpp'),
   os.path.join(root, 'src', 'anti_rush.cpp'),
+  os.path.join(root, 'src', 'admin.cpp'),
+  os.path.join(root, 'src', 'chat.cpp'),
+  os.path.join(root, 'src', 'config.cpp'),
+  os.path.join(root, 'src', 'player_language.cpp'),
+  os.path.join(root, 'src', 'messages.cpp'),
+  os.path.join(root, 'src', 'update_check.cpp'),
   os.path.join(sdk['path'], 'tier0_perproject', 'convar.cpp'),
   # Spawn keyvalues for the barrier's beams.
   os.path.join(sdk['path'], 'tier0_perproject', 'keyvalues3.cpp'),
