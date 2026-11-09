@@ -1,25 +1,23 @@
 {
   "_comment": "Combat Tweaks chat messages. Color tokens: {default} {red} {lightblue} {yellow} {lime} {grey}. {team} is the team color of the named player. Keep every {placeholder} when translating.",
-
   "rush_prefix": "{red}[ANTI-RUSH]{default}",
   "admin_prefix": "{lime}[Combat Tweaks]{default}",
-
-  "rush_attempt": "{rush_prefix} O jogador {team}{name}{default} tentou rushar uma área bloqueada.",
-  "barrier_locked": "{rush_prefix} Rush bloqueado. Libera em {seconds} segundos ou quando um time ficar com um jogador só.",
+  "rush_attempt": "{rush_prefix} {team}{name}{default} tentou rushar.",
+  "barrier_locked": "{rush_prefix} Rush bloqueado por {seconds}s.",
   "barrier_unlocked": "{rush_prefix} Rush liberado.",
-
-  "no_access": "{admin_prefix} Você não tem acesso a este comando.",
-  "help": "{admin_prefix} Comandos: {lime}!ct status{default}, {lime}!ct zone{default}, {lime}!ct zone save{default}, {lime}!ct zone cancel{default}, {lime}!ct zone list{default}, {lime}!ct zone remove <number>{default}, {lime}!ct reload{default}.",
-  "must_be_alive": "{admin_prefix} Você precisa estar vivo para marcar um canto.",
-  "zone_corner1": "{admin_prefix} Primeiro canto marcado. Vá até o canto oposto e digite {lime}!ct zone{default} de novo.",
-  "zone_corner2": "{admin_prefix} Segundo canto marcado, a caixa está aparecendo. Digite {lime}!ct zone save{default} para salvar ou {lime}!ct zone cancel{default} para descartar.",
-  "zone_saved": "{admin_prefix} Zona {number} salva em {map}.",
-  "zone_cancelled": "{admin_prefix} Desenho da zona cancelado.",
-  "zone_nothing": "{admin_prefix} Nada para salvar ainda. Fique no primeiro canto e digite {lime}!ct zone{default}.",
-  "zone_list_empty": "{admin_prefix} {map} não tem zonas.",
-  "zone_list_item": "{admin_prefix} Zona {number}: de {from} até {to}.",
-  "zone_removed": "{admin_prefix} Zona {number} removida de {map}.",
-  "zone_not_found": "{admin_prefix} {map} não tem a zona {number}.",
-  "reloaded": "{admin_prefix} Config, zonas e mensagens recarregadas.",
-  "status_in_console": "{admin_prefix} Status mostrado no seu console."
+  "no_access": "{admin_prefix} Sem acesso.",
+  "must_be_alive": "{admin_prefix} Você precisa estar vivo.",
+  "zone_corner1": "{admin_prefix} Canto 1 marcado. No 2: !ct zone",
+  "zone_corner2": "{admin_prefix} Caixa visível. !ct zone save / cancel",
+  "zone_saved": "{admin_prefix} Zona {number} salva.",
+  "zone_cancelled": "{admin_prefix} Zona cancelada.",
+  "zone_nothing": "{admin_prefix} Sem caixa. Comece: !ct zone",
+  "zone_list_empty": "{admin_prefix} Nenhuma zona neste mapa.",
+  "zone_removed": "{admin_prefix} Zona {number} removida.",
+  "zone_not_found": "{admin_prefix} A zona {number} não existe.",
+  "reloaded": "{admin_prefix} Recarregado.",
+  "status_in_console": "{admin_prefix} Status no seu console.",
+  "zone_list_item": "{admin_prefix} {number}: {from} - {to}",
+  "help": "{admin_prefix} !ct status | zone | reload",
+  "help_zone": "{admin_prefix} !ct zone [save | cancel | list | remove N]"
 }

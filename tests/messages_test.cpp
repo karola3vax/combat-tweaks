@@ -54,12 +54,12 @@ int main()
 
 	// Prefixes, colors and values; a leading space; outside text cannot carry color codes.
 	assert(texts.Format("en", "rush_attempt", {{"team", "{yellow}"}, {"name", "Bad\x07Guy {red}\n"}})
-		== " \x07[ANTI-RUSH]\x01 Player \x09" "BadGuy {red}\x01 tried to rush in a blocked zone.");
-	assert(texts.Format("en", "barrier_unlocked") == " \x07[ANTI-RUSH]\x01 Rushing is open.");
+		== " \x07[ANTI-RUSH]\x01 \x09" "BadGuy {red}\x01 tried to rush.");
+	assert(texts.Format("en", "barrier_unlocked") == " \x07[ANTI-RUSH]\x01 Rush is open.");
 	// A team value that is not a color adds nothing.
-	assert(texts.Format("en", "rush_attempt", {{"team", "\x07"}, {"name", "A"}}).find("Player A\x01") != std::string::npos);
+	assert(texts.Format("en", "rush_attempt", {{"team", "\x07"}, {"name", "A"}}).find(" A\x01 tried") != std::string::npos);
 	// Unknown placeholders stay visible.
-	assert(texts.Format("en", "zone_saved", {{"number", "2"}}) == " \x06[Combat Tweaks]\x01 Zone 2 saved for {map}.");
+	assert(texts.Format("en", "zone_saved") == " \x06[Combat Tweaks]\x01 Zone {number} saved.");
 
 	// Fallbacks: an unknown language reads English, an unknown key gives the key.
 	assert(texts.Format("xx", "barrier_unlocked") == texts.Format("en", "barrier_unlocked"));

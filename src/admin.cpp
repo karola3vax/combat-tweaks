@@ -107,7 +107,10 @@ void Run(int slot, const std::vector<std::string> &words)
 		else chat::Send(slot, "zone_not_found", {{"number", argument}, {"map", map}});
 	}
 	else
+	{
 		chat::Send(slot, "help");
+		chat::Send(slot, "help_zone");
+	}
 }
 
 std::vector<std::string> Words(const std::string &text)

@@ -1,25 +1,23 @@
 {
   "_comment": "Combat Tweaks chat messages. Color tokens: {default} {red} {lightblue} {yellow} {lime} {grey}. {team} is the team color of the named player. Keep every {placeholder} when translating.",
-
   "rush_prefix": "{red}[ANTI-RUSH]{default}",
   "admin_prefix": "{lime}[Combat Tweaks]{default}",
-
-  "rush_attempt": "{rush_prefix} Le joueur {team}{name}{default} a tenté de rush une zone bloquée.",
-  "barrier_locked": "{rush_prefix} Le rush est bloqué. Il s'ouvre dans {seconds} secondes, ou quand une équipe n'a plus qu'un joueur.",
-  "barrier_unlocked": "{rush_prefix} Le rush est ouvert.",
-
-  "no_access": "{admin_prefix} Tu n'as pas accès à cette commande.",
-  "help": "{admin_prefix} Commandes : {lime}!ct status{default}, {lime}!ct zone{default}, {lime}!ct zone save{default}, {lime}!ct zone cancel{default}, {lime}!ct zone list{default}, {lime}!ct zone remove <number>{default}, {lime}!ct reload{default}.",
-  "must_be_alive": "{admin_prefix} Tu dois être en vie pour placer un coin.",
-  "zone_corner1": "{admin_prefix} Premier coin placé. Va au coin opposé et tape à nouveau {lime}!ct zone{default}.",
-  "zone_corner2": "{admin_prefix} Deuxième coin placé, la zone est affichée. Tape {lime}!ct zone save{default} pour la garder ou {lime}!ct zone cancel{default} pour l'annuler.",
-  "zone_saved": "{admin_prefix} Zone {number} enregistrée pour {map}.",
-  "zone_cancelled": "{admin_prefix} Tracé de la zone annulé.",
-  "zone_nothing": "{admin_prefix} Rien à enregistrer pour l'instant. Place-toi au premier coin et tape {lime}!ct zone{default}.",
-  "zone_list_empty": "{admin_prefix} {map} n'a aucune zone.",
-  "zone_list_item": "{admin_prefix} Zone {number} : de {from} à {to}.",
-  "zone_removed": "{admin_prefix} Zone {number} supprimée de {map}.",
-  "zone_not_found": "{admin_prefix} {map} n'a pas de zone {number}.",
-  "reloaded": "{admin_prefix} Config, zones et messages rechargés.",
-  "status_in_console": "{admin_prefix} Statut affiché dans ta console."
+  "rush_attempt": "{rush_prefix} {team}{name}{default} a tenté de rush.",
+  "barrier_locked": "{rush_prefix} Rush bloqué {seconds}s.",
+  "barrier_unlocked": "{rush_prefix} Rush ouvert.",
+  "no_access": "{admin_prefix} Accès refusé.",
+  "must_be_alive": "{admin_prefix} Tu dois être en vie.",
+  "zone_corner1": "{admin_prefix} Coin 1 placé. Au coin 2 : !ct zone",
+  "zone_corner2": "{admin_prefix} Boîte affichée. !ct zone save / cancel",
+  "zone_saved": "{admin_prefix} Zone {number} enregistrée.",
+  "zone_cancelled": "{admin_prefix} Zone annulée.",
+  "zone_nothing": "{admin_prefix} Pas de boîte. Début : !ct zone",
+  "zone_list_empty": "{admin_prefix} Aucune zone sur cette carte.",
+  "zone_removed": "{admin_prefix} Zone {number} supprimée.",
+  "zone_not_found": "{admin_prefix} Pas de zone {number}.",
+  "reloaded": "{admin_prefix} Rechargé.",
+  "status_in_console": "{admin_prefix} Statut dans ta console.",
+  "zone_list_item": "{admin_prefix} {number}: {from} - {to}",
+  "help": "{admin_prefix} !ct status | zone | reload",
+  "help_zone": "{admin_prefix} !ct zone [save | cancel | list | remove N]"
 }

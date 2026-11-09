@@ -1,25 +1,23 @@
 {
   "_comment": "Combat Tweaks chat messages. Color tokens: {default} {red} {lightblue} {yellow} {lime} {grey}. {team} is the team color of the named player. Keep every {placeholder} when translating.",
-
   "rush_prefix": "{red}[ANTI-RUSH]{default}",
   "admin_prefix": "{lime}[Combat Tweaks]{default}",
-
-  "rush_attempt": "{rush_prefix} Игрок {team}{name}{default} попытался зарашить в закрытую зону.",
-  "barrier_locked": "{rush_prefix} Раш запрещён. Откроется через {seconds} сек. или когда в одной из команд останется один игрок.",
-  "barrier_unlocked": "{rush_prefix} Раш разрешён.",
-
-  "no_access": "{admin_prefix} У тебя нет доступа к этой команде.",
-  "help": "{admin_prefix} Команды: {lime}!ct status{default}, {lime}!ct zone{default}, {lime}!ct zone save{default}, {lime}!ct zone cancel{default}, {lime}!ct zone list{default}, {lime}!ct zone remove <number>{default}, {lime}!ct reload{default}.",
-  "must_be_alive": "{admin_prefix} Чтобы поставить угол, нужно быть живым.",
-  "zone_corner1": "{admin_prefix} Первый угол поставлен. Дойди до противоположного угла и снова введи {lime}!ct zone{default}.",
-  "zone_corner2": "{admin_prefix} Второй угол поставлен, зона показана. Введи {lime}!ct zone save{default}, чтобы сохранить, или {lime}!ct zone cancel{default}, чтобы отменить.",
-  "zone_saved": "{admin_prefix} Зона {number} сохранена для {map}.",
-  "zone_cancelled": "{admin_prefix} Создание зоны отменено.",
-  "zone_nothing": "{admin_prefix} Пока нечего сохранять. Встань в первый угол и введи {lime}!ct zone{default}.",
-  "zone_list_empty": "{admin_prefix} На {map} нет зон.",
-  "zone_list_item": "{admin_prefix} Зона {number}: от {from} до {to}.",
-  "zone_removed": "{admin_prefix} Зона {number} удалена с {map}.",
-  "zone_not_found": "{admin_prefix} На {map} нет зоны {number}.",
-  "reloaded": "{admin_prefix} Конфиг, зоны и сообщения перезагружены.",
-  "status_in_console": "{admin_prefix} Статус выведен в твою консоль."
+  "rush_attempt": "{rush_prefix} {team}{name}{default} пытался зарашить.",
+  "barrier_locked": "{rush_prefix} Раш закрыт на {seconds} сек.",
+  "barrier_unlocked": "{rush_prefix} Раш открыт.",
+  "no_access": "{admin_prefix} Нет доступа.",
+  "must_be_alive": "{admin_prefix} Нужно быть живым.",
+  "zone_corner1": "{admin_prefix} Угол 1 задан. У угла 2: !ct zone",
+  "zone_corner2": "{admin_prefix} Зона видна. !ct zone save / cancel",
+  "zone_saved": "{admin_prefix} Зона {number} сохранена.",
+  "zone_cancelled": "{admin_prefix} Зона отменена.",
+  "zone_nothing": "{admin_prefix} Зоны нет. Начни: !ct zone",
+  "zone_list_empty": "{admin_prefix} На этой карте нет зон.",
+  "zone_removed": "{admin_prefix} Зона {number} удалена.",
+  "zone_not_found": "{admin_prefix} Нет зоны {number}.",
+  "reloaded": "{admin_prefix} Перезагружено.",
+  "status_in_console": "{admin_prefix} Статус в консоли.",
+  "zone_list_item": "{admin_prefix} {number}: {from} - {to}",
+  "help": "{admin_prefix} !ct status | zone | reload",
+  "help_zone": "{admin_prefix} !ct zone [save | cancel | list | remove N]"
 }
