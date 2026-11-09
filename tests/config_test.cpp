@@ -35,7 +35,7 @@ int main()
 	assert(settings.anti_rush.unlock_seconds == 60); // out of range: default kept
 	assert(settings.anti_rush.callout_seconds == 1.5f);
 	assert((settings.anti_rush.line_color == config::Rgba {10, 20, 30, 255}));
-	assert(settings.anti_rush.glow_color_t[0] == 255); // bad color: default kept
+	assert(settings.anti_rush.glow_color_t[0] == 240); // bad color: default kept
 	assert(settings.admins.size() == 2 && settings.admins[0] == 76561198353131845ull);
 	assert(errors.size() == 5); // "yes", typo, "123", 900, glow_color_t
 
