@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -36,7 +37,7 @@ namespace
 
 constexpr float kPlayerHalfWidth = 16.0f; // the player's box sticks out this far from its origin
 constexpr float kEjectRate = 10.0f;       // per unit of overlap, so a player touching the edge barely moves
-constexpr float kBeamWidth = 1.0f;
+constexpr const char *kPanelModel = "models/retakes/retakes_barrier.vmdl"; // the game's retake barrier
 constexpr float kTouchHold = 0.5f;        // seconds a box stays lit after the last touch
 constexpr std::uint8_t kRenderTransAlpha = 1;
 constexpr std::uint8_t kRenderNone = 2;
@@ -68,8 +69,7 @@ void (*accept_input)(CEntityInstance *, const char *, CEntityInstance *, CEntity
 
 struct Offsets
 {
-	std::ptrdiff_t team, pawn_alive, pawn, body, scene_node, origin, velocity, rules, round_start, warmup, end_pos, width,
-		end_width, color, render_mode, name, glow, glow_color, glow_team, glow_type, glow_range, glow_range_min, model_state,
+	std::ptrdiff_t team, pawn_alive, pawn, body, scene_node, origin, velocity, rules, round_start, warmup, color, render_mode, name, glow, glow_color, glow_team, glow_type, glow_range, glow_range_min, model_state,
 		model_name, game_restart, health;
 } f;
 
@@ -172,27 +172,32 @@ void Paint(CEntityInstance *beam, const config::Rgba &rgba, bool notify)
 	beam->NetworkStateChanged(data);
 }
 
-// The 12 edges of a box as beams; bottom edges sit just above the floor so they don't flicker into it.
+// The 4 sides of a box as the game's retake barrier panels, spawned the way its retake_barrier_spawn
+// command does: origin at the bottom corner, turned towards the next corner, then width and height.
 std::vector<CEntityHandle> SpawnBox(const anti_rush::Box &box, const config::Rgba &rgba)
 {
 	std::vector<CEntityHandle> handles;
-	if (rgba[3] == 0) return handles; // alpha 0: invisible lines
-	for (auto edge : anti_rush::Edges(box))
+	if (rgba[3] == 0) return handles; // alpha 0: invisible barrier
+	const float corners[5][2] = {{box.min[0], box.min[1]}, {box.max[0], box.min[1]}, {box.max[0], box.max[1]},
+		{box.min[0], box.max[1]}, {box.min[0], box.min[1]}};
+	for (int side = 0; side < 4; ++side)
 	{
-		for (auto &point : edge)
-			if (point[2] == box.min[2]) point[2] += 1.0f;
-		CEntityInstance *beam = create_entity("beam", -1);
-		if (!beam) continue;
-		auto *end = &schema::Field<float>(beam, f.end_pos);
-		for (int axis = 0; axis < 3; ++axis) end[axis] = edge[1][axis];
-		schema::Field<float>(beam, f.width) = kBeamWidth;
-		schema::Field<float>(beam, f.end_width) = kBeamWidth;
-		Paint(beam, rgba, false);
-		schema::Field<std::uint8_t>(beam, f.render_mode) = kRenderTransAlpha;
+		const float dx = corners[side + 1][0] - corners[side][0];
+		const float dy = corners[side + 1][1] - corners[side][1];
+		CEntityInstance *panel = create_entity("func_retakebarrier", -1);
+		if (!panel) continue;
+		Paint(panel, rgba, false);
+		schema::Field<std::uint8_t>(panel, f.render_mode) = kRenderTransAlpha;
 		auto *values = new CEntityKeyValues(); // the game frees it
-		values->SetVector("origin", Vector(edge[0][0], edge[0][1], edge[0][2]));
-		dispatch_spawn(beam, values);
-		handles.push_back(beam->GetRefEHandle());
+		values->SetVector("origin", Vector(corners[side][0], corners[side][1], box.min[2]));
+		values->SetQAngle("angles", QAngle(0.0f, std::atan2(dy, dx) * 180.0f / 3.14159265f, 0.0f));
+		values->SetString("model", kPanelModel);
+		values->SetString("solid", "0"); // the plugin blocks players itself
+		values->SetFloat("barrier_width", std::sqrt(dx * dx + dy * dy));
+		values->SetFloat("barrier_height", box.max[2] - box.min[2]);
+		values->SetFloat("barrier_duration", 0.0f); // as the game's retake maps use it
+		dispatch_spawn(panel, values);
+		handles.push_back(panel->GetRefEHandle());
 	}
 	return handles;
 }
@@ -493,9 +498,6 @@ bool Init(CSchemaSystemTypeScope *scope, const void *server_module_address, INet
 		{&f.rules, "CCSGameRulesProxy", "m_pGameRules"},
 		{&f.round_start, "CCSGameRules", "m_fRoundStartTime"},
 		{&f.warmup, "CCSGameRules", "m_bWarmupPeriod"},
-		{&f.end_pos, "CBeam", "m_vecEndPos"},
-		{&f.width, "CBeam", "m_fWidth"},
-		{&f.end_width, "CBeam", "m_fEndWidth"},
 		{&f.color, "CBaseModelEntity", "m_clrRender"},
 		{&f.render_mode, "CBaseModelEntity", "m_nRenderMode"},
 		{&f.name, "CBasePlayerController", "m_iszPlayerName"},

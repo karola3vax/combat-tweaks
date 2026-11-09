@@ -82,8 +82,8 @@ Barriers reach a little below the lower corner and 200 units above the higher on
 | `anti_rush.unlock_seconds` | `60` | Seconds after freeze time before the barrier opens (`0`: no timer) |
 | `anti_rush.unlock_players_left` | `1` | Open as soon as a team has this many players alive, or fewer |
 | `anti_rush.round_messages` | `true` | Tell players in chat when the barrier closes and opens |
-| `anti_rush.line_color` | `[120, 120, 120, 160]` | Barrier lines, as `[red, green, blue, alpha]`. Alpha `0` hides them |
-| `anti_rush.touched_color` | `[255, 0, 0, 255]` | Line color while someone is against the barrier |
+| `anti_rush.line_color` | `[120, 120, 120, 160]` | Barrier walls (the game's retake barrier panels), as `[red, green, blue, alpha]`. The panel texture is orange, so this tints it. Alpha `0` hides them |
+| `anti_rush.touched_color` | `[255, 0, 0, 255]` | Wall color while someone is against the barrier |
 | `anti_rush.callout` | `true` | Name players who keep walking into the barrier, once per round |
 | `anti_rush.callout_seconds` | `0.5` | How long someone must push into it to be named |
 | `anti_rush.glow` | `true` | Make named rushers glow, seen by everyone |
@@ -104,14 +104,13 @@ Barriers reach a little below the lower corner and 200 units above the higher on
 ## After a CS2 update
 
 - **Player fields:** read from CS2's own schema, so they keep working.
-- **Barriers:** spawning the barrier lines and the rusher glow needs four game functions, found by byte pattern. If an update moves one, only the barrier, or only the glow, turns off with a console message, and the rest keeps working. `ct status` shows which.
+- **Barriers:** spawning the barrier walls and the rusher glow needs four game functions, found by byte pattern. If an update moves one, only the barrier, or only the glow, turns off with a console message, and the rest keeps working. `ct status` shows which.
 - **Fixes:** a fixed release follows.
 
 ## Good to know
 
 - **Visibility plugins:** plugins that hide players who can't be seen, such as anti-wallhack plugins, may also hide a rusher's glow behind walls.
 - **Respawn modes:** with `mp_respawn_on_death_*`, bodies are removed when the player respawns, whatever `hide_ragdolls` is set to.
-- **Lines when shooting:** barrier lines can look brighter or dimmer while shooting. This comes from the game's own exposure, not the plugin.
 
 ## Building
 

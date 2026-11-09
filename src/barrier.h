@@ -1,6 +1,6 @@
 #pragma once
 
-// Anti-rush barrier: a grey outline around each zone of the map, and players stopped at it like a wall,
+// Anti-rush barrier: the game's retake barrier panels around each zone of the map, and players stopped at it like a wall,
 // until either team is down to a few living players or the unlock time has passed. Also the in-game
 // zone editor.
 
