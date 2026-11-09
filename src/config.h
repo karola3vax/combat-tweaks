@@ -27,7 +27,7 @@ struct Settings
 		int unlock_players_left = 1; // unlocks once a team has this many or fewer alive
 		bool round_messages = true;
 		Rgba line_color {120, 120, 120, 20}; // barrier walls; named for the old outline, kept so configs still load
-		Rgba touched_color {255, 0, 0, 255};
+		Rgba touched_color {255, 0, 0, 120};
 		bool callout = true;
 		float callout_seconds = 0.5f; // walking into a barrier this long counts as rushing
 		bool glow = true;

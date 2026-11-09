@@ -30,8 +30,8 @@
     // The panel texture is orange, so this tints it. Alpha 0 hides them; 255 is solid.
     "line_color": [120, 120, 120, 20],
 
-    // Wall color while a player is against the barrier.
-    "touched_color": [255, 0, 0, 255],
+    // Wall color while a player pushes into the barrier (the same push that names them in chat).
+    "touched_color": [255, 0, 0, 120],
 
     // Announce players who keep walking into the barrier, once per round.
     "callout": true,

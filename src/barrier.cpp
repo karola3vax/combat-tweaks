@@ -639,9 +639,10 @@ void Frame()
 			}
 			if (!anti_rush::Inside(box, position)) continue;
 			touching = true;
-			last_touch[index] = globals->curtime;
 			float *velocity = &schema::Field<float>(pawn, f.velocity);
 			pushing = anti_rush::MovingIn(box, position, {velocity[0], velocity[1], velocity[2]});
+			// Red only for a push, the same thing the chat callout names, so players see why it lit up.
+			if (pushing) last_touch[index] = globals->curtime;
 			const anti_rush::Vec blocked =
 				anti_rush::Block(box, position, {velocity[0], velocity[1], velocity[2]}, kEjectRate);
 			for (int axis = 0; axis < 3; ++axis) velocity[axis] = blocked[axis];
