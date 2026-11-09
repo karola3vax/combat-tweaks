@@ -38,6 +38,7 @@ struct Settings
 		float center_seconds = 5.0f;
 		int damage_per_second = 50; // while pushing into the barrier; 0 turns it off
 		bool damage_can_kill = true;
+		bool damage_sound = true; // the game's body-hit sound on each hit
 	} anti_rush;
 
 	std::vector<std::uint64_t> admins; // SteamID64s allowed to use !ct commands

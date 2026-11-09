@@ -41,6 +41,8 @@ constexpr float kTouchHold = 0.5f;        // seconds a box stays lit after the l
 constexpr std::uint8_t kRenderTransAlpha = 1;
 constexpr std::uint8_t kRenderNone = 2;
 constexpr int kGlowAlways = 3;            // m_iGlowType: through walls
+constexpr const char *kHitSound = "Player.DamageBody.Onlooker"; // heard where the player stands
+constexpr float kSoundLife = 2.0f; // seconds before a sound entity is removed
 constexpr float kHitInterval = 0.5f;     // rush damage comes as one hit per this many seconds of pushing
 constexpr float kZoneFloor = 16.0f;       // editor zones reach this far below the lower corner (stairs, slopes)
 constexpr float kZoneHeight = 200.0f;     // ...and this far above the higher one, so jumping can't clear them
@@ -97,6 +99,7 @@ struct Rusher
 	float damage_owed = 0.0f;  // seconds of pushing towards the next damage hit
 };
 std::array<Rusher, 64> rushers;
+std::vector<std::pair<CEntityHandle, float>> sounds; // point_soundevents and when to remove them
 bool set_game_restart = false; // this plugin turned m_bGameRestart on, for the note
 
 // Editor: two corners per admin, and the preview box once both are set.
@@ -409,7 +412,22 @@ bool Kill(int slot)
 
 // Health off a player who keeps pushing into the barrier. A lethal amount kills them (a suicide),
 // unless the config keeps them at 1 health.
-void Hurt(int slot, CEntityInstance *pawn, Rusher &rusher, float dt)
+// The game's own hit sound at a spot, through a short-lived point_soundevent.
+void PlayHitSound(const anti_rush::Vec &position, float now)
+{
+	if (!accept_input) return;
+	CEntityInstance *sound = create_entity("point_soundevent", -1);
+	if (!sound) return;
+	auto *values = new CEntityKeyValues(); // the game frees it
+	values->SetVector("origin", Vector(position[0], position[1], position[2] + 40.0f)); // chest height
+	values->SetString("soundName", kHitSound);
+	dispatch_spawn(sound, values);
+	variant_t none;
+	accept_input(sound, "StartSound", nullptr, nullptr, &none, 0, nullptr);
+	sounds.emplace_back(sound->GetRefEHandle(), now + kSoundLife);
+}
+
+void Hurt(int slot, CEntityInstance *pawn, Rusher &rusher, float dt, const anti_rush::Vec &position, float now)
 {
 	if (settings.damage_per_second <= 0) return;
 	// Felt hits instead of 1 health per tick.
@@ -417,6 +435,7 @@ void Hurt(int slot, CEntityInstance *pawn, Rusher &rusher, float dt)
 	if (rusher.damage_owed < kHitInterval) return;
 	rusher.damage_owed -= kHitInterval;
 	const int damage = std::max(static_cast<int>(settings.damage_per_second * kHitInterval + 0.5f), 1);
+	if (settings.damage_sound) PlayHitSound(position, now);
 	int &health = schema::Field<int>(pawn, f.health);
 	if (health - damage <= 0 && settings.damage_can_kill && Kill(slot)) return;
 	health = std::max(health - damage, 1);
@@ -558,6 +577,12 @@ void Frame()
 		const bool alive = controller && schema::Field<bool>(controller, f.pawn_alive);
 		if (!alive || globals->curtime >= rusher.glow_until) StopGlow(rusher);
 	}
+	for (auto it = sounds.begin(); it != sounds.end();) // finished hit sounds
+	{
+		if (globals->curtime < it->second && Entity(it->first)) { ++it; continue; }
+		Remove(it->first);
+		it = sounds.erase(it);
+	}
 	for (Draft &draft : drafts) // previews vanish with the map
 		if (draft.corners == 2 && !draft.preview.empty() && !Entity(draft.preview.front())) draft.preview.clear();
 
@@ -615,7 +640,7 @@ void Frame()
 		}
 		rusher.pushing = pushing ? rusher.pushing + dt : 0.0f;
 		// Pushing flickers from tick to tick against the wall; only leaving the barrier starts the count over.
-		if (pushing) Hurt(slot, pawn, rusher, dt);
+		if (pushing) Hurt(slot, pawn, rusher, dt, position, globals->curtime);
 		else if (!touching) rusher.damage_owed = 0.0f;
 		// A caught rusher who keeps pushing keeps the note up; it then lingers for center_seconds.
 		if (rusher.caught && pushing && settings.center_message) rusher.center_until = globals->curtime + settings.center_seconds;
@@ -646,6 +671,8 @@ void Shutdown()
 	RemoveBeams();
 	for (Rusher &rusher : rushers) StopGlow(rusher);
 	for (Draft &draft : drafts) ClearPreview(draft);
+	for (auto &sound : sounds) Remove(sound.first);
+	sounds.clear();
 	rushers = {};
 	drafts = {};
 	locked = false;

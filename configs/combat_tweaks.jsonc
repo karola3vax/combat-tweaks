@@ -54,7 +54,10 @@
     "damage_per_second": 50,
 
     // Whether that damage may kill (the death counts as a suicide). If false, it stops at 1 health.
-    "damage_can_kill": true
+    "damage_can_kill": true,
+
+    // Play the game's body-hit sound on each hit, where the player stands.
+    "damage_sound": true
   },
 
   // SteamID64s of players allowed to use !ct commands (zone editor, status, reload).
