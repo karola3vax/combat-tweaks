@@ -15,6 +15,7 @@
   "zone_list_empty": "{admin_prefix} На этой карте пока нет зон.",
   "zone_removed": "{admin_prefix} Зона {number} удалена с этой карты.",
   "zone_not_found": "{admin_prefix} На этой карте нет зоны {number}.",
+  "score_reset": "{admin_prefix} Ваш счёт обнулён.",
   "reloaded": "{admin_prefix} Настройки, зоны и тексты перезагружены.",
   "status_in_console": "{admin_prefix} Отчёт о состоянии в твоей консоли.",
   "zone_list_item": "{admin_prefix} {number}: {from} - {to}",

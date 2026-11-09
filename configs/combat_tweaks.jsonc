@@ -69,5 +69,8 @@
   "admins": [],
 
   // Print a console line when a newer Combat Tweaks is out on GitHub.
-  "update_check": true
+  "update_check": true,
+
+  // Let players reset their own score (kills, deaths, assists, damage, MVPs) with !rs or /rs in chat.
+  "reset_score": true
 }

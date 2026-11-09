@@ -15,6 +15,7 @@
   "zone_list_empty": "{admin_prefix} 此地图还没有区域。",
   "zone_removed": "{admin_prefix} 区域 {number} 已从此地图删除。",
   "zone_not_found": "{admin_prefix} 此地图没有区域 {number}。",
+  "score_reset": "{admin_prefix} 你的得分已重置。",
   "reloaded": "{admin_prefix} 设置、区域和消息已重新加载。",
   "status_in_console": "{admin_prefix} 状态报告已输出到你的控制台。",
   "zone_list_item": "{admin_prefix} {number}: {from} - {to}",

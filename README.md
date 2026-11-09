@@ -50,6 +50,8 @@ The `ct` command works three ways:
 - **Player console:** `ct ...`, admins only.
 - **Chat:** `!ct ...` (seen by everyone) or `/ct ...` (hidden), admins only.
 
+Every player can type `!rs` (or `/rs`, hidden) in chat to reset their own score: kills, deaths, assists, damage, headshots, score and MVPs. Turn it off with `reset_score`.
+
 | Command | What it does |
 | --- | --- |
 | `ct status` | Shows every feature, this map's barriers and any config problems |
@@ -98,6 +100,7 @@ Barriers reach a little below the lower corner and 200 units above the higher on
 | `anti_rush.damage_can_kill` | `true` | Whether that damage may kill; the death counts as a suicide. If `false`, it stops at 1 health |
 | `admins` | `[]` | SteamID64s, in quotes, allowed to use `ct` in game |
 | `update_check` | `true` | Print a console line when a newer release is out |
+| `reset_score` | `true` | Let players reset their own score with `!rs` or `/rs` in chat |
 
 **Messages:** they're in `addons/combat_tweaks/translations/`, one file per language. They can be reworded or recolored with `{default}`, `{red}`, `{lightblue}`, `{yellow}`, `{lime}` and `{grey}`. Keep every `{placeholder}`, and keep lines short, because long lines wrap in the chat box. Players whose language has no file get English.
 

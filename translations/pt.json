@@ -15,6 +15,7 @@
   "zone_list_empty": "{admin_prefix} Este mapa ainda não tem zonas.",
   "zone_removed": "{admin_prefix} A zona {number} foi removida deste mapa.",
   "zone_not_found": "{admin_prefix} Este mapa não tem a zona {number}.",
+  "score_reset": "{admin_prefix} Sua pontuação foi zerada.",
   "reloaded": "{admin_prefix} Ajustes, zonas e mensagens recarregados.",
   "status_in_console": "{admin_prefix} O relatório de status está no seu console.",
   "zone_list_item": "{admin_prefix} {number}: {from} - {to}",

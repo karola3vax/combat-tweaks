@@ -16,6 +16,8 @@
 #include <cstring>
 #include <sstream>
 
+extern ISmmAPI *g_SMAPI;
+
 namespace admin
 {
 namespace
@@ -25,6 +27,32 @@ Hooks hooks;
 std::vector<std::uint64_t> admins;
 std::ptrdiff_t steam_id_offset = -1; // CBasePlayerController::m_steamID
 bool ready = false;
+bool reset_score = true;
+
+// The scoreboard line: score and MVPs on the controller, the rest in its match stats.
+struct
+{
+	std::ptrdiff_t tracking = -1, match_stats = -1, score = -1, mvps = -1;
+	std::vector<std::ptrdiff_t> stats; // in CSPerRoundStats_t, the base of CSMatchStats_t
+} score;
+
+bool ResetScore(int slot)
+{
+	CGameEntitySystem *entities = GameEntitySystem();
+	CEntityInstance *controller = entities ? entities->GetPlayerController(CPlayerSlot(slot)) : nullptr;
+	void *tracking = controller && score.tracking >= 0 ? schema::Field<void *>(controller, score.tracking) : nullptr;
+	if (!tracking) return false;
+	for (std::ptrdiff_t field : score.stats) schema::Field<int>(tracking, score.match_stats + field) = 0;
+	schema::Field<int>(controller, score.score) = 0;
+	schema::Field<int>(controller, score.mvps) = 0;
+	// Marking the services pointer resends the match stats, as public reset-score plugins do.
+	for (std::ptrdiff_t field : {score.tracking, score.score, score.mvps})
+	{
+		NetworkStateChangedData data(static_cast<uint32>(field));
+		controller->NetworkStateChanged(data);
+	}
+	return true;
+}
 
 bool Allowed(int slot)
 {
@@ -136,6 +164,11 @@ public:
 		if (!words.empty() && !words.back().empty() && words.back().back() == '"') words.back().pop_back();
 		if (words.empty()) return {KHook::Action::Ignore};
 		const std::string first = Lower(words.front());
+		if ((first == "!rs" || first == "/rs") && words.size() == 1 && reset_score)
+		{
+			if (ResetScore(slot)) chat::Send(slot, "score_reset");
+			return {first == "/rs" ? KHook::Action::Supersede : KHook::Action::Ignore};
+		}
 		if (first != "!ct" && first != "/ct") return {KHook::Action::Ignore};
 		words.erase(words.begin());
 		Run(slot, words);
@@ -162,15 +195,29 @@ bool Init(CSchemaSystemTypeScope *scope, Hooks given)
 	hooks = std::move(given);
 	steam_id_offset = schema::FieldOffset(scope, "CBasePlayerController", "m_steamID");
 	if (steam_id_offset < 0) return false;
+	score.tracking = schema::FieldOffset(scope, "CCSPlayerController", "m_pActionTrackingServices");
+	score.match_stats = schema::FieldOffset(scope, "CCSPlayerController_ActionTrackingServices", "m_matchStats");
+	score.score = schema::FieldOffset(scope, "CCSPlayerController", "m_iScore");
+	score.mvps = schema::FieldOffset(scope, "CCSPlayerController", "m_iMVPs");
+	score.stats.clear();
+	for (const char *field : {"m_iKills", "m_iDeaths", "m_iAssists", "m_iDamage", "m_iHeadShotKills", "m_iUtilityDamage", "m_iEnemiesFlashed"})
+		score.stats.push_back(schema::FieldOffset(scope, "CSPerRoundStats_t", field));
+	if (score.match_stats < 0 || score.score < 0 || score.mvps < 0
+		|| std::find(score.stats.begin(), score.stats.end(), -1) != score.stats.end())
+	{
+		score.tracking = -1;
+		META_CONPRINTF("[COMBAT_TWEAKS] !rs is off: CS2's schema changed.\n");
+	}
 	ConVar_Register(FCVAR_RELEASE | FCVAR_GAMEDLL);
 	dispatch_hook.Add(g_pCVar);
 	ready = true;
 	return true;
 }
 
-void Configure(const std::vector<std::uint64_t> &list)
+void Configure(const std::vector<std::uint64_t> &list, bool reset)
 {
 	admins = list;
+	reset_score = reset;
 }
 
 void Shutdown()

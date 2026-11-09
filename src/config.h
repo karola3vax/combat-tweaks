@@ -44,6 +44,7 @@ struct Settings
 
 	std::vector<std::uint64_t> admins; // SteamID64s allowed to use !ct commands
 	bool update_check = true;
+	bool reset_score = true; // !rs lets players zero their own scoreboard line
 };
 
 // Missing keys keep their defaults; wrong types, bad values and unknown keys are reported in `errors`

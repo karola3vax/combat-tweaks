@@ -165,7 +165,7 @@ void Reload()
 		barrier::Configure(g_config.anti_rush);
 		barrier::ReloadZones();
 	}
-	admin::Configure(g_config.admins);
+	admin::Configure(g_config.admins, g_config.reset_score);
 	chat::Reload();
 	update_check::Enabled(g_config.update_check);
 }
@@ -247,7 +247,7 @@ bool CombatTweaks::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, 
 	if (g_barrier_ready) barrier::Configure(g_config.anti_rush);
 	else META_CONPRINTF("[COMBAT_TWEAKS] Anti-rush is off: %s.\n", g_barrier_error.c_str());
 	if (!admin::Init(scope, {Reload, Status})) META_CONPRINTF("[COMBAT_TWEAKS] The ct command is off: CS2's schema changed.\n");
-	admin::Configure(g_config.admins);
+	admin::Configure(g_config.admins, g_config.reset_score);
 	update_check::Enabled(g_config.update_check);
 	update_check::Start(COMBAT_TWEAKS_VERSION);
 	g_SMAPI->AddListener(this, this);

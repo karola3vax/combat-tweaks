@@ -149,6 +149,7 @@ Settings Parse(std::string_view text, std::vector<std::string> &errors)
 	top.Bool("short_decals", settings.short_decals);
 	top.SteamIds("admins", settings.admins);
 	top.Bool("update_check", settings.update_check);
+	top.Bool("reset_score", settings.reset_score);
 	if (const Json *section = top.Object("anti_rush"))
 	{
 		auto &a = settings.anti_rush;

@@ -25,6 +25,7 @@ int main()
 	settings = config::Parse(R"({
 		"no_aimpunch": "yes",
 		"hide_ragdolls": false,
+		"reset_score": false,
 		"typo": 1,
 		"admins": ["76561198353131845", "123", 76561198000000000],
 		"anti_rush": { "unlock_seconds": 900, "callout_seconds": 1.5, "line_color": [10, 20, 30], "glow_color_t": [1, 2] }
@@ -32,6 +33,7 @@ int main()
 		errors);
 	assert(settings.no_aimpunch);                 // wrong type: default kept
 	assert(!settings.hide_ragdolls);              // taken
+	assert(!settings.reset_score);
 	assert(settings.anti_rush.unlock_seconds == 60); // out of range: default kept
 	assert(settings.anti_rush.callout_seconds == 1.5f);
 	assert((settings.anti_rush.line_color == config::Rgba {10, 20, 30, 255}));

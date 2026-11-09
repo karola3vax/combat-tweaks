@@ -15,6 +15,7 @@
   "zone_list_empty": "{admin_prefix} Cette carte n'a encore aucune zone.",
   "zone_removed": "{admin_prefix} La zone {number} a été retirée de cette carte.",
   "zone_not_found": "{admin_prefix} Cette carte n'a pas de zone {number}.",
+  "score_reset": "{admin_prefix} Ton score a été remis à zéro.",
   "reloaded": "{admin_prefix} Réglages, zones et messages rechargés.",
   "status_in_console": "{admin_prefix} Le rapport d'état est dans ta console.",
   "zone_list_item": "{admin_prefix} {number}: {from} - {to}",

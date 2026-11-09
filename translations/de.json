@@ -15,6 +15,7 @@
   "zone_list_empty": "{admin_prefix} Diese Map hat noch keine Zonen.",
   "zone_removed": "{admin_prefix} Zone {number} wurde von dieser Map entfernt.",
   "zone_not_found": "{admin_prefix} Diese Map hat keine Zone {number}.",
+  "score_reset": "{admin_prefix} Dein Punktestand wurde zurückgesetzt.",
   "reloaded": "{admin_prefix} Einstellungen, Zonen und Texte neu geladen.",
   "status_in_console": "{admin_prefix} Der Statusbericht steht in deiner Konsole.",
   "zone_list_item": "{admin_prefix} {number}: {from} - {to}",

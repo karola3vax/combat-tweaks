@@ -15,6 +15,7 @@
   "zone_list_empty": "{admin_prefix} Bu haritada henüz bölge yok.",
   "zone_removed": "{admin_prefix} Bölge {number} bu haritadan silindi.",
   "zone_not_found": "{admin_prefix} Bu haritada {number} numaralı bölge yok.",
+  "score_reset": "{admin_prefix} Skorun sıfırlandı.",
   "reloaded": "{admin_prefix} Ayarlar, bölgeler ve mesajlar yenilendi.",
   "status_in_console": "{admin_prefix} Durum raporu konsoluna yazıldı.",
   "zone_list_item": "{admin_prefix} {number}: {from} - {to}",

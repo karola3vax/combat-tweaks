@@ -15,6 +15,7 @@
   "zone_list_empty": "{admin_prefix} Ta mapa nie ma jeszcze stref.",
   "zone_removed": "{admin_prefix} Strefa {number} została usunięta z tej mapy.",
   "zone_not_found": "{admin_prefix} Ta mapa nie ma strefy {number}.",
+  "score_reset": "{admin_prefix} Twój wynik został wyzerowany.",
   "reloaded": "{admin_prefix} Ustawienia, strefy i teksty przeładowane.",
   "status_in_console": "{admin_prefix} Raport stanu jest w twojej konsoli.",
   "zone_list_item": "{admin_prefix} {number}: {from} - {to}",
