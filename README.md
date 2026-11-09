@@ -102,6 +102,8 @@ Barriers reach a little below the lower corner and 200 units above the higher on
 | `admins` | `[]` | SteamID64s, in quotes, allowed to use `ct` in game |
 | `update_check` | `true` | Print a console line when a newer release is out |
 | `reset_score` | `true` | Let players reset their own score with `!rs` or `/rs` in chat |
+| `team_colors.enabled` | `false` | Tint living player models in their team color |
+| `team_colors.t` / `team_colors.ct` | `[255, 80, 80]` / `[80, 140, 255]` | The tints, as `[red, green, blue]`. They multiply the model's colors, so pure `[255, 0, 0]` looks almost black |
 
 **Messages:** they're in `addons/combat_tweaks/translations/`, one file per language. They can be reworded or recolored with `{default}`, `{red}`, `{lightblue}`, `{yellow}`, `{lime}` and `{grey}`. Keep every `{placeholder}`, and keep lines short, because long lines wrap in the chat box. Players whose language has no file get English.
 

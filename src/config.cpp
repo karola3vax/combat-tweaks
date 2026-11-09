@@ -150,6 +150,13 @@ Settings Parse(std::string_view text, std::vector<std::string> &errors)
 	top.SteamIds("admins", settings.admins);
 	top.Bool("update_check", settings.update_check);
 	top.Bool("reset_score", settings.reset_score);
+	if (const Json *section = top.Object("team_colors"))
+	{
+		Reader colors(*section, "team_colors.", errors);
+		colors.Bool("enabled", settings.team_colors.enabled);
+		colors.Color("t", settings.team_colors.t);
+		colors.Color("ct", settings.team_colors.ct);
+	}
 	if (const Json *section = top.Object("anti_rush"))
 	{
 		auto &a = settings.anti_rush;

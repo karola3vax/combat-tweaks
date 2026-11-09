@@ -26,6 +26,7 @@ int main()
 		"no_aimpunch": "yes",
 		"hide_ragdolls": false,
 		"reset_score": false,
+		"team_colors": { "enabled": true, "ct": [1, 2, 3] },
 		"typo": 1,
 		"admins": ["76561198353131845", "123", 76561198000000000],
 		"anti_rush": { "unlock_seconds": 900, "callout_seconds": 1.5, "line_color": [10, 20, 30], "glow_color_t": [1, 2] }
@@ -34,6 +35,8 @@ int main()
 	assert(settings.no_aimpunch);                 // wrong type: default kept
 	assert(!settings.hide_ragdolls);              // taken
 	assert(!settings.reset_score);
+	assert(settings.team_colors.enabled && (settings.team_colors.ct == config::Rgba {1, 2, 3, 255}));
+	assert(settings.team_colors.t[0] == 255 && settings.team_colors.t[1] == 80); // default kept
 	assert(settings.anti_rush.unlock_seconds == 60); // out of range: default kept
 	assert(settings.anti_rush.callout_seconds == 1.5f);
 	assert((settings.anti_rush.line_color == config::Rgba {10, 20, 30, 255}));

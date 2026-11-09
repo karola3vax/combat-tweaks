@@ -45,6 +45,14 @@ struct Settings
 	std::vector<std::uint64_t> admins; // SteamID64s allowed to use !ct commands
 	bool update_check = true;
 	bool reset_score = true; // !rs lets players zero their own scoreboard line
+
+	// Tints living player models by team. The color multiplies the model, so pure red would look almost black.
+	struct TeamColors
+	{
+		bool enabled = false;
+		Rgba t {255, 80, 80, 255};
+		Rgba ct {80, 140, 255, 255};
+	} team_colors;
 };
 
 // Missing keys keep their defaults; wrong types, bad values and unknown keys are reported in `errors`

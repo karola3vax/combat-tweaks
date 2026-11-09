@@ -72,5 +72,13 @@
   "update_check": true,
 
   // Let players reset their own score (kills, deaths, assists, damage, MVPs) with !rs or /rs in chat.
-  "reset_score": true
+  "reset_score": true,
+
+  // Tint living player models in their team color: [red, green, blue].
+  // The color multiplies the model's own colors, so [255, 0, 0] would look almost black; keep some green and blue.
+  "team_colors": {
+    "enabled": false,
+    "t": [255, 80, 80],
+    "ct": [80, 140, 255]
+  }
 }

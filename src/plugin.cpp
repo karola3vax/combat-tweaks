@@ -63,6 +63,7 @@ std::ptrdiff_t g_pawn_offset = -1;         // CCSPlayerController::m_hPlayerPawn
 std::ptrdiff_t g_life_state_offset = -1;   // CBaseEntity::m_lifeState
 std::ptrdiff_t g_render_color_offset = -1; // CBaseModelEntity::m_clrRender
 std::ptrdiff_t g_render_mode_offset = -1;  // CBaseModelEntity::m_nRenderMode
+std::ptrdiff_t g_team_offset = -1;         // CBaseEntity::m_iTeamNum
 bool g_barrier_ready = false;
 std::string g_barrier_error;
 bool g_chat_ready = false;
@@ -79,6 +80,7 @@ struct Body
 	std::uint8_t render_mode = 0;
 };
 std::array<Body, 64> g_bodies;
+std::array<CEntityInstance *, 64> g_tinted {}; // pawns this plugin tinted, to hand back their normal look
 
 void RenderChanged(CEntityInstance *pawn, std::ptrdiff_t offset)
 {
@@ -107,6 +109,27 @@ void UpdateBody(Body &body, CEntityInstance *pawn, bool hide)
 	}
 	RenderChanged(pawn, g_render_color_offset);
 	RenderChanged(pawn, g_render_mode_offset);
+}
+
+constexpr std::uint8_t kTeamT = 2;
+constexpr std::uint8_t kTeamCT = 3;
+
+// Team tint on living pawns; only red, green and blue, as ragdoll hiding owns the alpha.
+void UpdateTint(int slot, CEntityInstance *pawn, bool alive)
+{
+	if (g_tinted[slot] != pawn) g_tinted[slot] = nullptr; // a new pawn starts with the normal look
+	const std::uint8_t team = schema::Field<std::uint8_t>(pawn, g_team_offset);
+	const bool tint = g_config.team_colors.enabled && alive && (team == kTeamT || team == kTeamCT);
+	if (!tint && !g_tinted[slot]) return;
+	const config::Rgba &want = !tint ? config::Rgba {255, 255, 255, 255}
+		: team == kTeamT ? g_config.team_colors.t : g_config.team_colors.ct;
+	auto *color = &schema::Field<std::uint8_t>(pawn, g_render_color_offset); // r, g, b, a
+	if (color[0] != want[0] || color[1] != want[1] || color[2] != want[2])
+	{
+		for (int i = 0; i < 3; ++i) color[i] = want[i];
+		RenderChanged(pawn, g_render_color_offset);
+	}
+	g_tinted[slot] = tint ? pawn : nullptr;
 }
 
 CEntityInstance *Pawn(int slot)
@@ -182,8 +205,8 @@ void Status(std::vector<std::string> &lines)
 	else lines.push_back("Anti-rush: unavailable, " + g_barrier_error);
 	chat::Status(lines);
 	lines.push_back(std::string("Center notes: ") + (center::Ready() ? "ready" : "waiting for the next map load"));
-	std::snprintf(line, sizeof(line), "Admins: %d; update check: %s", static_cast<int>(g_config.admins.size()),
-		on(g_config.update_check));
+	std::snprintf(line, sizeof(line), "Admins: %d; update check: %s; team colors: %s", static_cast<int>(g_config.admins.size()),
+		on(g_config.update_check), on(g_config.team_colors.enabled));
 	lines.push_back(line);
 	if (g_config_errors.empty()) lines.push_back("combat_tweaks.jsonc: no problems");
 	for (const std::string &error : g_config_errors) lines.push_back("combat_tweaks.jsonc: " + error);
@@ -217,8 +240,9 @@ bool CombatTweaks::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, 
 	g_life_state_offset = schema::FieldOffset(scope, "CBaseEntity", "m_lifeState");
 	g_render_color_offset = schema::FieldOffset(scope, "CBaseModelEntity", "m_clrRender");
 	g_render_mode_offset = schema::FieldOffset(scope, "CBaseModelEntity", "m_nRenderMode");
+	g_team_offset = schema::FieldOffset(scope, "CBaseEntity", "m_iTeamNum");
 	if (g_damage_flags_offset < 0 || g_pawn_offset < 0 || g_life_state_offset < 0 || g_render_color_offset < 0
-		|| g_render_mode_offset < 0)
+		|| g_render_mode_offset < 0 || g_team_offset < 0)
 	{
 		std::snprintf(error, maxlen,
 			"CS2's schema is missing a field (m_nTakeDamageFlags %d, m_hPlayerPawn %d, m_lifeState %d, m_clrRender %d, m_nRenderMode %d)",
@@ -271,6 +295,13 @@ bool CombatTweaks::Unload(char *, size_t)
 		if (!pawn) continue;
 		schema::Field<std::uint64_t>(pawn, g_damage_flags_offset) &= ~kNoTagging;
 		UpdateBody(g_bodies[slot], pawn, false);
+		if (g_tinted[slot] == pawn) // back to the normal look
+		{
+			auto *color = &schema::Field<std::uint8_t>(pawn, g_render_color_offset);
+			color[0] = color[1] = color[2] = 255;
+			RenderChanged(pawn, g_render_color_offset);
+		}
+		g_tinted[slot] = nullptr;
 	}
 	for (Setting &setting : g_settings)
 	{
@@ -298,6 +329,7 @@ KHook::Return<void> CombatTweaks::OnGameFrame(IServerGameDLL *, bool simulating,
 		if (!pawn) continue;
 		const bool dead = schema::Field<std::uint8_t>(pawn, g_life_state_offset) != kLifeAlive;
 		UpdateBody(g_bodies[slot], pawn, g_config.hide_ragdolls && dead);
+		UpdateTint(slot, pawn, !dead);
 #ifdef COMBAT_TWEAKS_TRACE
 		trace::Frame(slot, pawn);
 		if (slot % 2 != 0) continue; // odd slots keep the normal slowdown, as the control group
