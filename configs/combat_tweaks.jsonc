@@ -42,7 +42,7 @@
     // Make the rusher glow in their team's color, seen by everyone through walls.
     // [red, green, blue, alpha]: lower alpha for a softer glow. The defaults match CS2's spectator x-ray.
     "glow": true,
-    "glow_seconds": 3,
+    "glow_seconds": 5,
     "glow_color_t": [240, 195, 105, 100],
     "glow_color_ct": [135, 180, 235, 100],
 

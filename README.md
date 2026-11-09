@@ -90,7 +90,7 @@ Barriers reach a little below the lower corner and 200 units above the higher on
 | `anti_rush.callout` | `true` | Name players who keep walking into the barrier, once per round |
 | `anti_rush.callout_seconds` | `0.5` | How long someone must push into it to be named |
 | `anti_rush.glow` | `true` | Make named rushers glow, seen by everyone |
-| `anti_rush.glow_seconds` | `3` | How long the glow lasts. The rusher's center note says so meanwhile |
+| `anti_rush.glow_seconds` | `5` | How long the glow lasts. The rusher's center note says so meanwhile |
 | `anti_rush.glow_color_t` | `[240, 195, 105, 100]` | Glow color for terrorists; lower alpha is softer |
 | `anti_rush.glow_color_ct` | `[135, 180, 235, 100]` | Glow color for counter-terrorists |
 | `anti_rush.center_message` | `true` | Show the rusher a private note in the middle of their screen |
