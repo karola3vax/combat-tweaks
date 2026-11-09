@@ -39,6 +39,7 @@ constexpr float kPlayerHalfWidth = 16.0f; // the player's box sticks out this fa
 constexpr float kEjectRate = 10.0f;       // per unit of overlap, so a player touching the edge barely moves
 constexpr const char *kPanelModel = "models/retakes/retakes_barrier.vmdl"; // the game's retake barrier
 constexpr float kTouchHold = 0.5f;        // seconds a box stays lit after the last touch
+constexpr float kFadeSeconds = 0.25f;     // the color fades between grey and red over this long
 constexpr std::uint8_t kRenderTransAlpha = 1;
 constexpr std::uint8_t kRenderNone = 2;
 constexpr int kGlowAlways = 3;            // m_iGlowType: through walls
@@ -86,7 +87,7 @@ struct Beam
 };
 std::vector<Beam> beams;
 std::vector<float> last_touch; // curtime of the latest touch, per box
-std::vector<bool> lit;         // per box: drawn in the touched color
+std::vector<float> heat;       // per box: 0 drawn in the line color, 1 in the touched color
 CEntityHandle rules_proxy;
 int rules_search_frames = 0;
 
@@ -216,7 +217,7 @@ void RemoveBeams()
 
 void SpawnBeams()
 {
-	lit.assign(boxes.size(), false);
+	heat.assign(boxes.size(), 0.0f);
 	for (std::size_t index = 0; index < boxes.size(); ++index)
 		for (const CEntityHandle &handle : SpawnBox(boxes[index], settings.line_color)) beams.push_back({handle, index});
 }
@@ -228,11 +229,14 @@ bool BeamsAlive()
 	return true;
 }
 
-void SetBoxTouched(std::size_t box, bool touched)
+// Paints a box between the line color (heat 0) and the touched color (heat 1).
+void PaintBox(std::size_t box, float level)
 {
+	config::Rgba rgba;
+	for (int i = 0; i < 4; ++i)
+		rgba[i] = static_cast<std::uint8_t>(settings.line_color[i] + (settings.touched_color[i] - settings.line_color[i]) * level + 0.5f);
 	for (const Beam &beam : beams)
-		if (CEntityInstance *entity = beam.box == box ? Entity(beam.handle) : nullptr)
-			Paint(entity, touched ? settings.touched_color : settings.line_color, true);
+		if (CEntityInstance *entity = beam.box == box ? Entity(beam.handle) : nullptr) Paint(entity, rgba, true);
 }
 
 void ClearPreview(Draft &draft)
@@ -667,12 +671,14 @@ void Frame()
 		}
 	}
 	ShowNotes(rules, globals->curtime, round_time);
-	for (std::size_t index = 0; index < boxes.size() && index < lit.size(); ++index)
+	for (std::size_t index = 0; index < boxes.size() && index < heat.size(); ++index)
 	{
-		const bool touched = globals->curtime - last_touch[index] < kTouchHold;
-		if (touched == lit[index]) continue;
-		lit[index] = touched;
-		SetBoxTouched(index, touched);
+		const float target = globals->curtime - last_touch[index] < kTouchHold ? 1.0f : 0.0f;
+		float &level = heat[index];
+		if (level == target) continue;
+		const float step = dt / kFadeSeconds;
+		level = target > level ? std::min(level + step, target) : std::max(level - step, target);
+		PaintBox(index, level);
 	}
 }
 
