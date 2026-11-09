@@ -36,7 +36,9 @@ namespace
 constexpr float kPlayerHalfWidth = 16.0f; // the player's box sticks out this far from its origin
 constexpr float kEjectRate = 10.0f; // per unit of overlap, so a player touching the edge barely moves
 constexpr float kBeamWidth = 1.0f;
-constexpr std::uint8_t kBeamAlpha = 96;          // faint, so the lines don't distract
+constexpr std::uint8_t kBeamAlpha = 160; // visible but not distracting
+constexpr std::uint8_t kGrey = 120;         // grey: glowing white pulsed with auto-exposure when shooting
+constexpr float kTouchHold = 0.5f;          // seconds the box stays lit after the last touch
 constexpr std::uint8_t kRenderTransAlpha = 1;
 
 // Checked against build 2000942: each matches exactly once.
@@ -71,7 +73,14 @@ std::string config_path;
 INetworkServerService *network = nullptr;
 std::string map;
 std::vector<anti_rush::Box> boxes; // for the current map
-std::vector<CEntityHandle> beams;
+struct Beam
+{
+	CEntityHandle handle;
+	std::size_t box;
+};
+std::vector<Beam> beams;
+std::vector<float> last_touch; // curtime of the latest touch, per box
+std::vector<bool> lit;         // per box: drawn red because a player is against it
 CEntityHandle rules_proxy;
 int rules_search_frames = 0;
 
@@ -161,18 +170,19 @@ void LoadConfig()
 void RemoveBeams()
 {
 	CGameEntitySystem *entities = GameEntitySystem();
-	for (const CEntityHandle &handle : beams)
-		if (CEntityInstance *beam = entities ? entities->GetEntityInstance(handle) : nullptr) remove_entity(beam);
+	for (const Beam &beam : beams)
+		if (CEntityInstance *entity = entities ? entities->GetEntityInstance(beam.handle) : nullptr) remove_entity(entity);
 	beams.clear();
 }
 
 void SpawnBeams()
 {
-	for (const anti_rush::Box &box : boxes)
-		for (auto edge : anti_rush::Edges(box))
+	lit.assign(boxes.size(), false);
+	for (std::size_t index = 0; index < boxes.size(); ++index)
+		for (auto edge : anti_rush::Edges(boxes[index]))
 		{
 			for (auto &point : edge)
-				if (point[2] == box.min[2]) point[2] += 1.0f; // just above the floor, so it doesn't flicker into it
+				if (point[2] == boxes[index].min[2]) point[2] += 1.0f; // just above the floor, so it doesn't flicker into it
 			CEntityInstance *beam = create_entity("beam", -1);
 			if (!beam) continue;
 			auto *end = &schema::Field<float>(beam, f.end_pos);
@@ -180,22 +190,39 @@ void SpawnBeams()
 			schema::Field<float>(beam, f.width) = kBeamWidth;
 			schema::Field<float>(beam, f.end_width) = kBeamWidth;
 			auto *color = &schema::Field<std::uint8_t>(beam, f.color); // r, g, b, a
-			color[0] = color[1] = color[2] = 120; // grey: glowing white pulsed with auto-exposure when shooting
+			color[0] = color[1] = color[2] = kGrey;
 			color[3] = kBeamAlpha;
 			schema::Field<std::uint8_t>(beam, f.render_mode) = kRenderTransAlpha;
 			auto *values = new CEntityKeyValues(); // the game frees it
 			values->SetVector("origin", Vector(edge[0][0], edge[0][1], edge[0][2]));
 			dispatch_spawn(beam, values);
-			beams.push_back(beam->GetRefEHandle());
+			beams.push_back({beam->GetRefEHandle(), index});
 		}
 }
 
 bool BeamsAlive()
 {
 	CGameEntitySystem *entities = GameEntitySystem();
-	for (const CEntityHandle &handle : beams)
-		if (!entities || !entities->GetEntityInstance(handle)) return false;
+	for (const Beam &beam : beams)
+		if (!entities || !entities->GetEntityInstance(beam.handle)) return false;
 	return !beams.empty();
+}
+
+// Recolors every beam of a box: full red while a player is against it, faint grey otherwise.
+void SetBoxTouched(std::size_t box, bool touched)
+{
+	CGameEntitySystem *entities = GameEntitySystem();
+	for (const Beam &beam : beams)
+	{
+		CEntityInstance *entity = beam.box == box && entities ? entities->GetEntityInstance(beam.handle) : nullptr;
+		if (!entity) continue;
+		auto *color = &schema::Field<std::uint8_t>(entity, f.color); // r, g, b, a
+		color[0] = touched ? 255 : kGrey;
+		color[1] = color[2] = touched ? 0 : kGrey;
+		color[3] = touched ? 255 : kBeamAlpha;
+		NetworkStateChangedData data(static_cast<uint32>(f.color));
+		entity->NetworkStateChanged(data);
+	}
 }
 
 void *GameRules()
@@ -286,6 +313,7 @@ void Frame()
 		LoadConfig();
 		const auto found = config.boxes.find(map);
 		boxes = found == config.boxes.end() ? std::vector<anti_rush::Box> {} : found->second;
+		last_touch.assign(boxes.size(), -1000.0f);
 		META_CONPRINTF("[NO_HIT_EFFECTS] Map \"%s\": %d anti-rush barrier(s).\n", map.c_str(), static_cast<int>(boxes.size()));
 	}
 	if (boxes.empty()) return;
@@ -333,20 +361,29 @@ void Frame()
 		if (!node) continue;
 		const float *origin = &schema::Field<float>(node, f.origin);
 		const anti_rush::Vec position {origin[0], origin[1], origin[2]};
-		for (anti_rush::Box box : boxes)
+		for (std::size_t index = 0; index < boxes.size(); ++index)
 		{
+			anti_rush::Box box = boxes[index];
 			for (int axis = 0; axis < 2; ++axis)
 			{
 				box.min[axis] -= kPlayerHalfWidth;
 				box.max[axis] += kPlayerHalfWidth;
 			}
 			if (!anti_rush::Inside(box, position)) continue;
+			last_touch[index] = globals->curtime;
 			float *velocity = &schema::Field<float>(pawn, f.velocity);
 			const anti_rush::Vec pushed =
 				anti_rush::Block(box, position, {velocity[0], velocity[1], velocity[2]}, kEjectRate);
 			for (int axis = 0; axis < 3; ++axis) velocity[axis] = pushed[axis];
 			break;
 		}
+	}
+	for (std::size_t index = 0; index < boxes.size() && index < lit.size(); ++index)
+	{
+		const bool touched = globals->curtime - last_touch[index] < kTouchHold;
+		if (touched == lit[index]) continue;
+		lit[index] = touched;
+		SetBoxTouched(index, touched);
 	}
 }
 
