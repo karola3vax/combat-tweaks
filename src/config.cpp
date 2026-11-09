@@ -163,7 +163,10 @@ Settings Parse(std::string_view text, std::vector<std::string> &errors)
 		rush.Float("callout_seconds", a.callout_seconds, 0.0f, 10.0f);
 		rush.Bool("glow", a.glow);
 		rush.Float("glow_seconds", a.glow_seconds, 0.0f, 60.0f);
-		rush.Color("glow_color", a.glow_color);
+		rush.Color("glow_color_t", a.glow_color_t);
+		rush.Color("glow_color_ct", a.glow_color_ct);
+		rush.Bool("center_message", a.center_message);
+		rush.Float("center_seconds", a.center_seconds, 0.0f, 10.0f);
 	}
 	return settings;
 }

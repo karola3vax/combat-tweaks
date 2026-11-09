@@ -1,7 +1,9 @@
 #include "barrier.h"
 
 #include "anti_rush.h"
+#include "center.h"
 #include "chat.h"
+#include "module.h"
 #include "schema.h"
 
 #include <ISmmPlugin.h>
@@ -21,15 +23,7 @@
 #include <cstring>
 #include <fstream>
 #include <iterator>
-#include <optional>
 #include <vector>
-
-#ifdef _WIN32
-#include <windows.h>
-#include <psapi.h>
-#else
-#include <link.h>
-#endif
 
 extern ISmmAPI *g_SMAPI;
 
@@ -61,12 +55,6 @@ constexpr const char *kRemoveEntity = "48 89 FE 48 85 FF 74 ? 48 8D 05 ? ? ? ? 4
 constexpr const char *kAcceptInput = "55 48 89 E5 41 57 49 89 FF 41 56 48 8D BD ? ? ? ? 41 55 4C 8D AD ? ? ? ? 41 54 4D 89 C4 53";
 #endif
 
-struct Segment
-{
-	const std::uint8_t *start;
-	std::size_t size;
-};
-
 CEntityInstance *(*create_entity)(const char *, int) = nullptr;
 void (*dispatch_spawn)(CEntityInstance *, CEntityKeyValues *) = nullptr;
 void (*remove_entity)(CEntityInstance *) = nullptr;
@@ -76,7 +64,7 @@ struct Offsets
 {
 	std::ptrdiff_t team, pawn_alive, pawn, body, scene_node, origin, velocity, rules, round_start, warmup, end_pos, width,
 		end_width, color, render_mode, name, glow, glow_color, glow_team, glow_type, glow_range, glow_range_min, model_state,
-		model_name;
+		model_name, game_restart;
 } f;
 
 config::Settings::AntiRush settings;
@@ -102,8 +90,10 @@ struct Rusher
 	bool caught = false;       // announced this round
 	CEntityHandle relay, glow; // the model copies that show the glow
 	float glow_until = 0.0f;
+	float center_until = 0.0f; // the private note shows until then
 };
 std::array<Rusher, 64> rushers;
+bool set_game_restart = false; // this plugin turned m_bGameRestart on, for the note
 
 // Editor: two corners per admin, and the preview box once both are set.
 struct Draft
@@ -118,73 +108,6 @@ float last_round_start = -1.0f;
 float last_frame_time = 0.0f;
 bool locked = false;
 bool opened_this_round = false; // once open, the barrier stays open until the next round
-
-std::vector<Segment> ModuleSegments(const void *address)
-{
-	std::vector<Segment> segments;
-#ifdef _WIN32
-	HMODULE module = nullptr;
-	MODULEINFO info {};
-	if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-			static_cast<const char *>(address), &module)
-		&& GetModuleInformation(GetCurrentProcess(), module, &info, sizeof(info)))
-		segments.push_back({static_cast<const std::uint8_t *>(info.lpBaseOfDll), info.SizeOfImage});
-#else
-	struct Search
-	{
-		std::uintptr_t address;
-		std::vector<Segment> *result;
-	} search {reinterpret_cast<std::uintptr_t>(address), &segments};
-	dl_iterate_phdr(
-		[](dl_phdr_info *info, size_t, void *data) -> int {
-			auto *search = static_cast<Search *>(data);
-			std::vector<Segment> found;
-			bool contains = false;
-			for (int i = 0; i < info->dlpi_phnum; ++i)
-			{
-				const ElfW(Phdr) &header = info->dlpi_phdr[i];
-				if (header.p_type != PT_LOAD || header.p_memsz == 0) continue;
-				const std::uintptr_t start = info->dlpi_addr + header.p_vaddr;
-				found.push_back({reinterpret_cast<const std::uint8_t *>(start), static_cast<std::size_t>(header.p_memsz)});
-				contains |= search->address >= start && search->address < start + header.p_memsz;
-			}
-			if (!contains) return 0;
-			*search->result = std::move(found);
-			return 1;
-		},
-		&search);
-#endif
-	return segments;
-}
-
-// The one place in the module matching the pattern ("?" is any byte), or nullptr.
-void *FindUnique(const std::vector<Segment> &segments, const char *pattern)
-{
-	std::vector<std::optional<std::uint8_t>> bytes;
-	for (const char *at = pattern; *at;)
-	{
-		if (*at == ' ') ++at;
-		else if (*at == '?') bytes.emplace_back(), ++at;
-		else
-		{
-			bytes.emplace_back(static_cast<std::uint8_t>(std::strtoul(at, nullptr, 16)));
-			at += 2;
-		}
-	}
-	void *found = nullptr;
-	int count = 0;
-	for (const Segment &segment : segments)
-	{
-		if (bytes.size() > segment.size) continue;
-		for (const std::uint8_t *at = segment.start; at + bytes.size() <= segment.start + segment.size && count < 2; ++at)
-		{
-			std::size_t i = 0;
-			while (i < bytes.size() && (!bytes[i] || at[i] == *bytes[i])) ++i;
-			if (i == bytes.size()) found = const_cast<std::uint8_t *>(at), ++count;
-		}
-	}
-	return count == 1 ? found : nullptr;
-}
 
 std::string ReadFile(const std::string &path)
 {
@@ -350,11 +273,11 @@ CEntityInstance *LivingPawn(int slot, anti_rush::Vec &position)
 // A prop_dynamic with the rusher's model. The relay copies the player's pose; the glow copy
 // follows the relay and carries the glow, because CS2 draws no glow on player pawns (the way
 // public ESP plugins do it).
-void WriteGlow(CEntityInstance *prop, bool notify)
+void WriteGlow(CEntityInstance *prop, bool notify, const config::Rgba &color)
 {
 	void *glow = &schema::Field<std::byte>(prop, f.glow);
 	auto *glow_color = &schema::Field<std::uint8_t>(glow, f.glow_color);
-	for (int i = 0; i < 4; ++i) glow_color[i] = settings.glow_color[i];
+	for (int i = 0; i < 4; ++i) glow_color[i] = color[i];
 	schema::Field<int>(glow, f.glow_team) = -1; // everyone sees it
 	schema::Field<int>(glow, f.glow_type) = kGlowAlways;
 	schema::Field<int>(glow, f.glow_range) = 5000;
@@ -368,8 +291,9 @@ void WriteGlow(CEntityInstance *prop, bool notify)
 	}
 }
 
-CEntityInstance *SpawnModelCopy(const char *model, bool glowing)
+CEntityInstance *SpawnModelCopy(const char *model, const config::Rgba *glow_color)
 {
+	const bool glowing = glow_color != nullptr;
 	CEntityInstance *prop = create_entity("prop_dynamic", -1);
 	if (!prop) return nullptr;
 	prop->m_pEntity->m_flags = static_cast<EntityFlags_t>(prop->m_pEntity->m_flags & ~4u); // as the ESP plugins do
@@ -378,7 +302,7 @@ CEntityInstance *SpawnModelCopy(const char *model, bool glowing)
 	{
 		color[0] = color[1] = color[2] = 0;
 		color[3] = 1; // all but invisible; only the glow shows
-		WriteGlow(prop, false);
+		WriteGlow(prop, false, *glow_color);
 	}
 	else
 		schema::Field<std::uint8_t>(prop, f.render_mode) = kRenderNone;
@@ -387,7 +311,7 @@ CEntityInstance *SpawnModelCopy(const char *model, bool glowing)
 	values->SetString("spawnflags", "256");
 	values->SetString("solid", "0"); // nobody may bump into it
 	dispatch_spawn(prop, values);
-	if (glowing) WriteGlow(prop, true); // spawning resets the glow, so set it again, as the ESP plugins do
+	if (glowing) WriteGlow(prop, true, *glow_color); // spawning resets the glow, so set it again, as the ESP plugins do
 	return prop;
 }
 
@@ -397,14 +321,14 @@ void Follow(CEntityInstance *follower, CEntityInstance *target)
 	accept_input(follower, "FollowEntity", target, follower, &value, 0, nullptr);
 }
 
-void StartGlow(Rusher &rusher, CEntityInstance *pawn)
+void StartGlow(Rusher &rusher, CEntityInstance *pawn, int team)
 {
 	void *body = schema::Field<void *>(pawn, f.body);
 	void *node = body ? schema::Field<void *>(body, f.scene_node) : nullptr;
 	const char *model = node ? schema::Field<CUtlSymbolLarge>(node, f.model_state + f.model_name).String() : nullptr;
 	if (!model || !*model) return;
-	CEntityInstance *relay = SpawnModelCopy(model, false);
-	CEntityInstance *glow = relay ? SpawnModelCopy(model, true) : nullptr;
+	CEntityInstance *relay = SpawnModelCopy(model, nullptr);
+	CEntityInstance *glow = relay ? SpawnModelCopy(model, team == 3 ? &settings.glow_color_ct : &settings.glow_color_t) : nullptr;
 	if (!glow)
 	{
 		if (relay) remove_entity(relay);
@@ -429,6 +353,41 @@ void Announce(CEntityInstance *controller)
 	META_CONPRINTF("[COMBAT_TWEAKS] Anti-rush: %s tried to rush.\n", name.c_str());
 }
 
+// The rusher's private note, sent every tick while it shows. Live rounds flash and drop center
+// panels unless m_bGameRestart is set (ModSharp's FixHtmlFlashing), so it is set while a note
+// shows, except during warmup or when the game itself has a restart pending.
+void ShowNotes(void *rules, float now, float round_time)
+{
+	bool showing = false;
+	for (int slot = 0; slot < 64; ++slot)
+	{
+		Rusher &rusher = rushers[slot];
+		if (rusher.center_until <= now) continue;
+		if (!locked || !Controller(slot))
+		{
+			rusher.center_until = 0.0f;
+			continue;
+		}
+		showing = true;
+		const int left = static_cast<int>(settings.unlock_seconds - round_time + 0.999f);
+		center::Send(slot, settings.unlock_seconds > 0
+				? chat::Format(slot, "rush_center", {{"seconds", std::to_string(std::max(left, 0))}})
+				: chat::Format(slot, "rush_center_wait"));
+	}
+	if (!rules) return;
+	bool &restart = schema::Field<bool>(rules, f.game_restart);
+	if (showing && !restart && !schema::Field<bool>(rules, f.warmup))
+	{
+		restart = true;
+		set_game_restart = true;
+	}
+	else if (!showing && set_game_restart)
+	{
+		restart = false;
+		set_game_restart = false;
+	}
+}
+
 void SetLocked(bool now_locked, int alive_t, int alive_ct, float round_time)
 {
 	if (now_locked == locked) return;
@@ -449,11 +408,11 @@ bool Init(CSchemaSystemTypeScope *scope, const void *server_module_address, INet
 {
 	network = network_service;
 	zones_path = path;
-	const auto segments = ModuleSegments(server_module_address);
-	create_entity = reinterpret_cast<decltype(create_entity)>(FindUnique(segments, kCreateEntity));
-	dispatch_spawn = reinterpret_cast<decltype(dispatch_spawn)>(FindUnique(segments, kDispatchSpawn));
-	remove_entity = reinterpret_cast<decltype(remove_entity)>(FindUnique(segments, kRemoveEntity));
-	accept_input = reinterpret_cast<decltype(accept_input)>(FindUnique(segments, kAcceptInput));
+	const auto segments = module::Segments(server_module_address);
+	create_entity = reinterpret_cast<decltype(create_entity)>(module::FindUnique(segments, kCreateEntity));
+	dispatch_spawn = reinterpret_cast<decltype(dispatch_spawn)>(module::FindUnique(segments, kDispatchSpawn));
+	remove_entity = reinterpret_cast<decltype(remove_entity)>(module::FindUnique(segments, kRemoveEntity));
+	accept_input = reinterpret_cast<decltype(accept_input)>(module::FindUnique(segments, kAcceptInput));
 	if (!accept_input) META_CONPRINTF("[COMBAT_TWEAKS] Anti-rush glow is off: a CS2 update moved AcceptInput.\n");
 	if (!create_entity || !dispatch_spawn || !remove_entity)
 	{
@@ -492,6 +451,7 @@ bool Init(CSchemaSystemTypeScope *scope, const void *server_module_address, INet
 		{&f.glow_range_min, "CGlowProperty", "m_nGlowRangeMin"},
 		{&f.model_state, "CSkeletonInstance", "m_modelState"},
 		{&f.model_name, "CModelState", "m_ModelName"},
+		{&f.game_restart, "CCSGameRules", "m_bGameRestart"},
 	};
 	for (const auto &field : fields)
 	{
@@ -582,6 +542,7 @@ void Frame()
 	if (!locked)
 	{
 		if (!beams.empty()) RemoveBeams();
+		ShowNotes(rules, globals->curtime, round_time);
 		return;
 	}
 	if (beams.empty() || !BeamsAlive()) // first lock, a reload, or a round restart removed them
@@ -617,13 +578,15 @@ void Frame()
 		if (!settings.callout || rusher.caught || rusher.pushing < settings.callout_seconds) continue;
 		rusher.caught = true;
 		Announce(Controller(slot));
+		if (settings.center_message) rusher.center_until = globals->curtime + settings.center_seconds;
 		if (settings.glow && accept_input)
 		{
 			StopGlow(rusher);
-			StartGlow(rusher, pawn);
+			StartGlow(rusher, pawn, schema::Field<std::uint8_t>(Controller(slot), f.team));
 			rusher.glow_until = globals->curtime + settings.glow_seconds;
 		}
 	}
+	ShowNotes(rules, globals->curtime, round_time);
 	for (std::size_t index = 0; index < boxes.size() && index < lit.size(); ++index)
 	{
 		const bool touched = globals->curtime - last_touch[index] < kTouchHold;

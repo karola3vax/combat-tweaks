@@ -2,6 +2,7 @@
 
 #include "admin.h"
 #include "barrier.h"
+#include "center.h"
 #include "chat.h"
 #include "config.h"
 #include "schema.h"
@@ -180,6 +181,7 @@ void Status(std::vector<std::string> &lines)
 	if (g_barrier_ready) barrier::Status(lines);
 	else lines.push_back("Anti-rush: unavailable, " + g_barrier_error);
 	chat::Status(lines);
+	lines.push_back(std::string("Center notes: ") + (center::Ready() ? "ready" : "waiting for the next map load"));
 	std::snprintf(line, sizeof(line), "Admins: %d; update check: %s", static_cast<int>(g_config.admins.size()),
 		on(g_config.update_check));
 	lines.push_back(line);
@@ -240,6 +242,7 @@ bool CombatTweaks::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, 
 	ApplySettings();
 	g_chat_ready = chat::Init(g_directory + "/translations");
 	if (!g_chat_ready) META_CONPRINTF("[COMBAT_TWEAKS] Chat messages are off: this CS2 version changed how they are sent.\n");
+	if (!center::Init(server_)) META_CONPRINTF("[COMBAT_TWEAKS] Rusher center notes are off: CS2 changed its event manager.\n");
 	g_barrier_ready = barrier::Init(scope, server_, network_service, g_directory + "/zones.jsonc", g_barrier_error);
 	if (g_barrier_ready) barrier::Configure(g_config.anti_rush);
 	else META_CONPRINTF("[COMBAT_TWEAKS] Anti-rush is off: %s.\n", g_barrier_error.c_str());
@@ -260,6 +263,7 @@ bool CombatTweaks::Unload(char *, size_t)
 	update_check::Stop();
 	admin::Shutdown();
 	barrier::Shutdown();
+	center::Shutdown();
 	chat::Shutdown();
 	for (int slot = 0; slot < 64; ++slot)
 	{

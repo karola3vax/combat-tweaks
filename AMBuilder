@@ -18,6 +18,8 @@ protobuf = builder.tools.Protoc(protoc=config.sdk_target.protoc, sources=[
   # CSVCMsg_GetCvarValue and its answer: each player's game language.
   os.path.join(sdk['path'], 'common', 'source2_steam_stats.proto'),
   os.path.join(sdk['path'], 'common', 'netmessages.proto'),
+  # CMsgSource1LegacyGameEvent: the center note.
+  os.path.join(sdk['path'], 'game', 'shared', 'gameevents.proto'),
   # CUserMessageTextMsg: chat and console lines.
   os.path.join(sdk['path'], 'game', 'shared', 'usermessages.proto'),
 ])
@@ -63,6 +65,8 @@ plugin.sources += [
   os.path.join(root, 'src', 'barrier.cpp'),
   os.path.join(root, 'src', 'anti_rush.cpp'),
   os.path.join(root, 'src', 'admin.cpp'),
+  os.path.join(root, 'src', 'center.cpp'),
+  os.path.join(root, 'src', 'module.cpp'),
   os.path.join(root, 'src', 'chat.cpp'),
   os.path.join(root, 'src', 'config.cpp'),
   os.path.join(root, 'src', 'player_language.cpp'),

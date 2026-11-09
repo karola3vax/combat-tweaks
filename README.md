@@ -88,7 +88,10 @@ Barriers reach a little below the lower corner and 200 units above the higher on
 | `anti_rush.callout_seconds` | `0.5` | How long someone must push into it to be named |
 | `anti_rush.glow` | `true` | Make named rushers glow, seen by everyone |
 | `anti_rush.glow_seconds` | `5` | How long the glow lasts |
-| `anti_rush.glow_color` | `[255, 0, 0]` | Glow color |
+| `anti_rush.glow_color_t` | `[255, 170, 30]` | Glow color for terrorists |
+| `anti_rush.glow_color_ct` | `[60, 150, 255]` | Glow color for counter-terrorists |
+| `anti_rush.center_message` | `true` | Show the rusher a private note in the middle of their screen |
+| `anti_rush.center_seconds` | `3` | How long that note stays |
 | `admins` | `[]` | SteamID64s, in quotes, allowed to use `ct` in game |
 | `update_check` | `true` | Print a console line when a newer release is out |
 

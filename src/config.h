@@ -32,7 +32,10 @@ struct Settings
 		float callout_seconds = 0.5f; // walking into a barrier this long counts as rushing
 		bool glow = true;
 		float glow_seconds = 5.0f;
-		Rgba glow_color {255, 0, 0, 255};
+		Rgba glow_color_t {255, 170, 30, 255};  // orange
+		Rgba glow_color_ct {60, 150, 255, 255}; // blue
+		bool center_message = true;             // a private center-screen note to the rusher
+		float center_seconds = 3.0f;
 	} anti_rush;
 
 	std::vector<std::uint64_t> admins; // SteamID64s allowed to use !ct commands

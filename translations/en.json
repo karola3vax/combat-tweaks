@@ -19,5 +19,7 @@
   "status_in_console": "{admin_prefix} Status is in your console.",
   "zone_list_item": "{admin_prefix} {number}: {from} - {to}",
   "help": "{admin_prefix} !ct status | zone | reload",
-  "help_zone": "{admin_prefix} !ct zone [save | cancel | list | remove N]"
+  "help_zone": "{admin_prefix} !ct zone [save | cancel | list | remove N]",
+  "rush_center": "<font class='fontWeight-Bold' color='#ff4040'>ANTI-RUSH</font><br>Opens in {seconds}s<br>",
+  "rush_center_wait": "<font class='fontWeight-Bold' color='#ff4040'>ANTI-RUSH</font><br>Opens at the last player<br>"
 }

@@ -21,6 +21,9 @@ void Shutdown();
 void SendAll(const char *key, const Values &values = {}, int team = 0);
 // Slot -1 is the server console (English, no colors).
 void Send(int slot, const char *key, const Values &values = {});
+// A text in the player's language (English for slot -1), for other places than chat.
+std::string Format(int slot, const char *key, const Values &values = {});
+
 // A plain line in a player's console, or the server console for slot -1.
 void Console(int slot, const std::string &line);
 

@@ -19,5 +19,7 @@
   "status_in_console": "{admin_prefix} Durum konsolunda.",
   "zone_list_item": "{admin_prefix} {number}: {from} - {to}",
   "help": "{admin_prefix} !ct status | zone | reload",
-  "help_zone": "{admin_prefix} !ct zone [save | cancel | list | remove N]"
+  "help_zone": "{admin_prefix} !ct zone [save | cancel | list | remove N]",
+  "rush_center": "<font class='fontWeight-Bold' color='#ff4040'>ANTI-RUSH</font><br>{seconds} sn sonra açılır<br>",
+  "rush_center_wait": "<font class='fontWeight-Bold' color='#ff4040'>ANTI-RUSH</font><br>Son oyuncu kalınca açılır<br>"
 }

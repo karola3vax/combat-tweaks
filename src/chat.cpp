@@ -2,13 +2,13 @@
 
 #include "messages.h"
 #include "player_language.h"
+#include "recipient.h"
 
 #include <ISmmPlugin.h>
 #include <engine2/igameeventsystem.h>
 #include <engine2/inetworkserverservice.h>
 #include <entity2/entityinstance.h>
 #include <gameentitysystem.h>
-#include <irecipientfilter.h>
 #include <networksystem/inetworkmessages.h>
 #include <engine2/ivengineserver2.h>
 
@@ -34,19 +34,6 @@ std::string folder;
 std::vector<std::string> load_errors;
 bool ready = false;
 std::chrono::steady_clock::time_point next_query {};
-
-class OneRecipient final : public IRecipientFilter
-{
-public:
-	explicit OneRecipient(int slot) { recipients_.Set(slot); }
-	NetChannelBufType_t GetNetworkBufType() const override { return BUF_RELIABLE; }
-	bool IsInitMessage() const override { return false; }
-	const CPlayerBitVec &GetRecipients() const override { return recipients_; }
-	CPlayerSlot GetPredictedPlayerSlot() const override { return CPlayerSlot(-1); }
-
-private:
-	CPlayerBitVec recipients_; // starts empty
-};
 
 bool IsPlayer(int slot)
 {
@@ -143,6 +130,11 @@ void Send(int slot, const char *key, const Values &values)
 {
 	if (slot < 0) META_CONPRINTF("%s\n", Plain(texts.Format("en", key, values)).c_str());
 	else Post(slot, kHudPrintTalk, texts.Format(language::Get(slot), key, values));
+}
+
+std::string Format(int slot, const char *key, const Values &values)
+{
+	return texts.Format(slot < 0 ? std::string("en") : language::Get(slot), key, values);
 }
 
 void Console(int slot, const std::string &line)
