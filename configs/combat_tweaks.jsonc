@@ -41,7 +41,7 @@
     // Make the rusher glow in their team's color, seen by everyone through walls.
     // [red, green, blue, alpha]: lower alpha for a softer glow.
     "glow": true,
-    "glow_seconds": 5,
+    "glow_seconds": 3,
     "glow_color_t": [255, 220, 0, 100],
     "glow_color_ct": [0, 220, 255, 100],
 

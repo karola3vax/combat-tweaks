@@ -21,5 +21,6 @@
   "help": "{admin_prefix} !ct status | zone | reload",
   "help_zone": "{admin_prefix} !ct zone [save | cancel | list | remove N]",
   "rush_center": "<span class='fontSize-l'><span color='#FF0000'>[ANTI-RUSH]</span><br><span color='#FFFFFF'>Otwiera się za {seconds} s</span></span><br>",
-  "rush_center_wait": "<span class='fontSize-l'><span color='#FF0000'>[ANTI-RUSH]</span><br><span color='#FFFFFF'>Otwiera się przy ostatnim graczu</span></span><br>"
+  "rush_center_wait": "<span class='fontSize-l'><span color='#FF0000'>[ANTI-RUSH]</span><br><span color='#FFFFFF'>Otwiera się przy ostatnim graczu</span></span><br>",
+  "rush_center_seen": "<span class='fontSize-l'><span color='#FFD24D'>Wszyscy cię widzą.</span></span><br>"
 }

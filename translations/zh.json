@@ -21,5 +21,6 @@
   "help": "{admin_prefix} !ct status | zone | reload",
   "help_zone": "{admin_prefix} !ct zone [save | cancel | list | remove N]",
   "rush_center": "<span class='fontSize-l'><span color='#FF0000'>[ANTI-RUSH]</span><br><span color='#FFFFFF'>{seconds} 秒后开放</span></span><br>",
-  "rush_center_wait": "<span class='fontSize-l'><span color='#FF0000'>[ANTI-RUSH]</span><br><span color='#FFFFFF'>剩最后一人时开放</span></span><br>"
+  "rush_center_wait": "<span class='fontSize-l'><span color='#FF0000'>[ANTI-RUSH]</span><br><span color='#FFFFFF'>剩最后一人时开放</span></span><br>",
+  "rush_center_seen": "<span class='fontSize-l'><span color='#FFD24D'>所有人都能看到你。</span></span><br>"
 }

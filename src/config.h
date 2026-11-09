@@ -31,7 +31,7 @@ struct Settings
 		bool callout = true;
 		float callout_seconds = 0.5f; // walking into a barrier this long counts as rushing
 		bool glow = true;
-		float glow_seconds = 5.0f;
+		float glow_seconds = 3.0f;
 		Rgba glow_color_t {255, 220, 0, 100};   // yellow, a little see-through
 		Rgba glow_color_ct {0, 220, 255, 100};  // cyan
 		bool center_message = true;             // a private center-screen note to the rusher

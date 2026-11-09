@@ -370,9 +370,11 @@ void ShowNotes(void *rules, float now, float round_time)
 		}
 		showing = true;
 		const int left = static_cast<int>(settings.unlock_seconds - round_time + 0.999f);
-		center::Send(slot, settings.unlock_seconds > 0
-				? chat::Format(slot, "rush_center", {{"seconds", std::to_string(std::max(left, 0))}})
-				: chat::Format(slot, "rush_center_wait"));
+		std::string html = settings.unlock_seconds > 0
+			? chat::Format(slot, "rush_center", {{"seconds", std::to_string(std::max(left, 0))}})
+			: chat::Format(slot, "rush_center_wait");
+		if (rusher.glow.IsValid()) html += chat::Format(slot, "rush_center_seen"); // while everyone sees them
+		center::Send(slot, html);
 	}
 	if (!rules) return;
 	bool &restart = schema::Field<bool>(rules, f.game_restart);
