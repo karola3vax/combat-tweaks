@@ -32,8 +32,8 @@ struct Settings
 		float callout_seconds = 0.5f; // walking into a barrier this long counts as rushing
 		bool glow = true;
 		float glow_seconds = 3.0f;
-		Rgba glow_color_t {255, 220, 0, 100};   // yellow, a little see-through
-		Rgba glow_color_ct {0, 220, 255, 100};  // cyan
+		Rgba glow_color_t {240, 195, 105, 100};  // gold, as CS2's spectator x-ray draws T
+		Rgba glow_color_ct {135, 180, 235, 100}; // sky blue, as the x-ray draws CT
 		bool center_message = true;             // a private center-screen note to the rusher
 		float center_seconds = 5.0f;
 	} anti_rush;

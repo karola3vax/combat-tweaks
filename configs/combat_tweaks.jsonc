@@ -39,11 +39,11 @@
     "callout_seconds": 0.5,
 
     // Make the rusher glow in their team's color, seen by everyone through walls.
-    // [red, green, blue, alpha]: lower alpha for a softer glow.
+    // [red, green, blue, alpha]: lower alpha for a softer glow. The defaults match CS2's spectator x-ray.
     "glow": true,
     "glow_seconds": 3,
-    "glow_color_t": [255, 220, 0, 100],
-    "glow_color_ct": [0, 220, 255, 100],
+    "glow_color_t": [240, 195, 105, 100],
+    "glow_color_ct": [135, 180, 235, 100],
 
     // Show the rusher a private note in the middle of their screen, with the time until it opens.
     // It stays while they keep pushing, then this many seconds more.
