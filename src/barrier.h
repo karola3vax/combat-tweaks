@@ -1,6 +1,6 @@
 #pragma once
 
-// Anti-rush barrier: red lines around each configured box, and players pushed out of it,
+// Anti-rush barrier: a grey outline on the floor under each configured box, and players pushed out of it,
 // until either team is down to one living player or the unlock time has passed.
 
 #include <string>

@@ -35,7 +35,9 @@ namespace
 
 constexpr float kPlayerHalfWidth = 16.0f; // the player's box sticks out this far from its origin
 constexpr float kPushSpeed = 250.0f;
-constexpr float kBeamWidth = 2.0f;
+constexpr float kBeamWidth = 1.0f;
+constexpr std::uint8_t kBeamAlpha = 96;          // faint, so the lines don't distract
+constexpr std::uint8_t kRenderTransAlpha = 1;
 
 // Checked against build 2000942: each matches exactly once.
 #ifdef _WIN32
@@ -61,7 +63,7 @@ void (*remove_entity)(CEntityInstance *) = nullptr;
 struct Offsets
 {
 	std::ptrdiff_t team, pawn_alive, pawn, body, scene_node, origin, velocity, rules, round_start, warmup, end_pos, width,
-		end_width, color;
+		end_width, color, render_mode;
 } f;
 
 anti_rush::Config config;
@@ -167,8 +169,11 @@ void RemoveBeams()
 void SpawnBeams()
 {
 	for (const anti_rush::Box &box : boxes)
-		for (const auto &edge : anti_rush::Edges(box))
+		for (auto edge : anti_rush::Edges(box))
 		{
+			// Only the floor outline: the full box was too distracting.
+			if (edge[0][2] != box.min[2] || edge[1][2] != box.min[2]) continue;
+			edge[0][2] = edge[1][2] = box.min[2] + 1.0f; // just above the floor, so it doesn't flicker into it
 			CEntityInstance *beam = create_entity("beam", -1);
 			if (!beam) continue;
 			auto *end = &schema::Field<float>(beam, f.end_pos);
@@ -176,9 +181,9 @@ void SpawnBeams()
 			schema::Field<float>(beam, f.width) = kBeamWidth;
 			schema::Field<float>(beam, f.end_width) = kBeamWidth;
 			auto *color = &schema::Field<std::uint8_t>(beam, f.color); // r, g, b, a
-			color[0] = 255;
-			color[1] = color[2] = 0;
-			color[3] = 255;
+			color[0] = color[1] = color[2] = 120; // grey: glowing white pulsed with auto-exposure when shooting
+			color[3] = kBeamAlpha;
+			schema::Field<std::uint8_t>(beam, f.render_mode) = kRenderTransAlpha;
 			auto *values = new CEntityKeyValues(); // the game frees it
 			values->SetVector("origin", Vector(edge[0][0], edge[0][1], edge[0][2]));
 			dispatch_spawn(beam, values);
@@ -249,6 +254,7 @@ bool Init(CSchemaSystemTypeScope *scope, const void *server_module_address, INet
 		{&f.width, "CBeam", "m_fWidth"},
 		{&f.end_width, "CBeam", "m_fEndWidth"},
 		{&f.color, "CBaseModelEntity", "m_clrRender"},
+		{&f.render_mode, "CBaseModelEntity", "m_nRenderMode"},
 	};
 	for (const auto &field : fields)
 	{
