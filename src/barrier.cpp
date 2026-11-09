@@ -192,11 +192,17 @@ std::vector<CEntityHandle> SpawnBox(const anti_rush::Box &box, const config::Rgb
 		values->SetVector("origin", Vector(corners[side][0], corners[side][1], box.min[2]));
 		values->SetQAngle("angles", QAngle(0.0f, std::atan2(dy, dx) * 180.0f / 3.14159265f, 0.0f));
 		values->SetString("model", kPanelModel);
-		values->SetString("solid", "0"); // the plugin blocks players itself
+		values->SetString("solid", "0");
 		values->SetFloat("barrier_width", std::sqrt(dx * dx + dy * dy));
 		values->SetFloat("barrier_height", box.max[2] - box.min[2]);
 		values->SetFloat("barrier_duration", 0.0f); // as the game's retake maps use it
 		dispatch_spawn(panel, values);
+		// The panel is solid whatever "solid" says, and players stopped by it never count as pushing.
+		if (accept_input)
+		{
+			variant_t none;
+			accept_input(panel, "DisableCollision", nullptr, nullptr, &none, 0, nullptr);
+		}
 		handles.push_back(panel->GetRefEHandle());
 	}
 	return handles;
