@@ -1,5 +1,6 @@
 #include "plugin.h"
 
+#include "barrier.h"
 #include "schema.h"
 #ifdef NO_HIT_EFFECTS_TRACE
 #include "trace.h"
@@ -9,6 +10,7 @@
 #include <entity2/entityinstance.h>
 #include <gameentitysystem.h>
 #include <interfaces/interfaces.h>
+#include <engine2/inetworkserverservice.h>
 #include <schemasystem/schemasystem.h>
 #include <tier0/convar.h>
 #include <tier0/icvar.h>
@@ -161,6 +163,11 @@ bool NoHitEffects::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, 
 		convar.RemoveFlags(setting.stripped);
 	}
 	ApplySettings();
+	std::string barrier_error;
+	INetworkServerService *network_service = nullptr;
+	GET_V_IFACE_ANY(GetEngineFactory, network_service, INetworkServerService, NETWORKSERVERSERVICE_INTERFACE_VERSION);
+	if (!barrier::Init(scope, server_, network_service, std::string(ismm->GetBaseDir()) + "/addons/no_hit_effects/anti_rush.ini", barrier_error))
+		META_CONPRINTF("[NO_HIT_EFFECTS] Anti-rush is off: %s.\n", barrier_error.c_str());
 	game_frame_.Add(server_);
 	META_CONPRINTF("[NO_HIT_EFFECTS] No Hit Effects %s loaded%s.\n", NO_HIT_EFFECTS_VERSION, late ? " late" : "");
 	return true;
@@ -169,6 +176,7 @@ bool NoHitEffects::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, 
 bool NoHitEffects::Unload(char *, size_t)
 {
 	game_frame_.Remove(server_);
+	barrier::Shutdown();
 	for (int slot = 0; slot < 64; ++slot)
 	{
 		CEntityInstance *pawn = Pawn(slot);
@@ -201,6 +209,7 @@ KHook::Return<void> NoHitEffects::OnGameFrame(IServerGameDLL *, bool simulating,
 		auto &flags = schema::Field<std::uint64_t>(pawn, g_damage_flags_offset);
 		if ((flags & kNoTagging) == 0) flags |= kNoTagging;
 	}
+	barrier::Frame();
 #ifndef NO_HIT_EFFECTS_TRACE // the trace build leaves the settings alone so a test can compare values
 	// Map changes and game mode configs write these back (Valve's deathmatch config sets the decal one).
 	const auto now = Clock::now();

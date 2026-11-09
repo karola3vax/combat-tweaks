@@ -47,7 +47,12 @@ compiler.defines += ['META_IS_SOURCE2', 'NO_HIT_EFFECTS_VERSION="{}"'.format(ver
 config.SdkHelpers.configureCxx(builder, plugin, sdk)
 plugin.sources += [
   os.path.join(root, 'src', 'plugin.cpp'),
+  os.path.join(root, 'src', 'barrier.cpp'),
+  os.path.join(root, 'src', 'anti_rush.cpp'),
   os.path.join(sdk['path'], 'tier0_perproject', 'convar.cpp'),
+  # Spawn keyvalues for the barrier's beams.
+  os.path.join(sdk['path'], 'tier0_perproject', 'keyvalues3.cpp'),
+  os.path.join(sdk['path'], 'entity2', 'entitykeyvalues.cpp'),
   # GameEntitySystem() and CEntitySystem::GetEntityIdentity (used by GetPlayerController).
   os.path.join(sdk['path'], 'entity2', 'entitysystem.cpp'),
   os.path.join(sdk['path'], 'entity2', 'entityidentity.cpp'),

@@ -54,6 +54,7 @@ def main() -> None:
   (stage / "metamod").mkdir(parents=True, exist_ok=True)
   shutil.copy2(binary, stage / "no_hit_effects" / "bin" / name)
   shutil.copy2(ROOT / "configs" / "no_hit_effects.vdf", stage / "metamod" / "no_hit_effects.vdf")
+  shutil.copy2(ROOT / "configs" / "anti_rush.ini", stage / "no_hit_effects" / "anti_rush.ini")
   print(f"Built {binary}")
 
 
