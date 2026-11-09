@@ -36,6 +36,8 @@ struct Settings
 		Rgba glow_color_ct {135, 180, 235, 100}; // sky blue, as the x-ray draws CT
 		bool center_message = true;             // a private center-screen note to the rusher
 		float center_seconds = 5.0f;
+		int damage_per_second = 20; // while pushing into the barrier; 0 turns it off
+		bool damage_can_kill = true;
 	} anti_rush;
 
 	std::vector<std::uint64_t> admins; // SteamID64s allowed to use !ct commands

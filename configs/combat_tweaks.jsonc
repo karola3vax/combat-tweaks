@@ -48,7 +48,13 @@
     // Show the rusher a private note in the middle of their screen, with the time until it opens.
     // It stays while they keep pushing, then this many seconds more.
     "center_message": true,
-    "center_seconds": 5
+    "center_seconds": 5,
+
+    // Health a player loses each second while pushing into the barrier. 0 turns it off.
+    "damage_per_second": 20,
+
+    // Whether that damage may kill (the death counts as a suicide). If false, it stops at 1 health.
+    "damage_can_kill": true
   },
 
   // SteamID64s of players allowed to use !ct commands (zone editor, status, reload).

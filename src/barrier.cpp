@@ -14,6 +14,7 @@
 #include <gameentitysystem.h>
 #include <engine2/inetworkgameserver.h>
 #include <engine2/inetworkserverservice.h>
+#include <engine2/ivengineserver2.h>
 #include <variant.h>
 
 #include <algorithm>
@@ -64,13 +65,14 @@ struct Offsets
 {
 	std::ptrdiff_t team, pawn_alive, pawn, body, scene_node, origin, velocity, rules, round_start, warmup, end_pos, width,
 		end_width, color, render_mode, name, glow, glow_color, glow_team, glow_type, glow_range, glow_range_min, model_state,
-		model_name, game_restart;
+		model_name, game_restart, health;
 } f;
 
 config::Settings::AntiRush settings;
 std::string zones_path;
 anti_rush::Zones all_zones;
 INetworkServerService *network = nullptr;
+IVEngineServer2 *engine = nullptr;
 std::string map;
 std::vector<anti_rush::Box> boxes; // for the current map
 struct Beam
@@ -91,6 +93,7 @@ struct Rusher
 	CEntityHandle relay, glow; // the model copies that show the glow
 	float glow_until = 0.0f;
 	float center_until = 0.0f; // the private note shows until then
+	float damage_owed = 0.0f;  // fractions of a health point not taken yet
 };
 std::array<Rusher, 64> rushers;
 bool set_game_restart = false; // this plugin turned m_bGameRestart on, for the note
@@ -390,6 +393,26 @@ void ShowNotes(void *rules, float now, float round_time)
 	}
 }
 
+// Health off a player who keeps pushing into the barrier. A lethal amount kills them through the
+// game's own "kill" command (a suicide), unless the config keeps them at 1 health.
+void Hurt(int slot, CEntityInstance *pawn, Rusher &rusher, float dt)
+{
+	if (settings.damage_per_second <= 0) return;
+	rusher.damage_owed += settings.damage_per_second * dt;
+	const int damage = static_cast<int>(rusher.damage_owed);
+	if (damage <= 0) return;
+	rusher.damage_owed -= static_cast<float>(damage);
+	int &health = schema::Field<int>(pawn, f.health);
+	if (health - damage <= 0 && settings.damage_can_kill && engine)
+	{
+		engine->ClientCommand(CPlayerSlot(slot), "kill");
+		return;
+	}
+	health = std::max(health - damage, 1);
+	NetworkStateChangedData data(static_cast<uint32>(f.health));
+	pawn->NetworkStateChanged(data);
+}
+
 void SetLocked(bool now_locked, int alive_t, int alive_ct, float round_time)
 {
 	if (now_locked == locked) return;
@@ -410,6 +433,7 @@ bool Init(CSchemaSystemTypeScope *scope, const void *server_module_address, INet
 {
 	network = network_service;
 	zones_path = path;
+	engine = static_cast<IVEngineServer2 *>(g_SMAPI->GetEngineFactory()(SOURCE2ENGINETOSERVER_INTERFACE_VERSION, nullptr));
 	const auto segments = module::Segments(server_module_address);
 	create_entity = reinterpret_cast<decltype(create_entity)>(module::FindUnique(segments, kCreateEntity));
 	dispatch_spawn = reinterpret_cast<decltype(dispatch_spawn)>(module::FindUnique(segments, kDispatchSpawn));
@@ -454,6 +478,7 @@ bool Init(CSchemaSystemTypeScope *scope, const void *server_module_address, INet
 		{&f.model_state, "CSkeletonInstance", "m_modelState"},
 		{&f.model_name, "CModelState", "m_ModelName"},
 		{&f.game_restart, "CCSGameRules", "m_bGameRestart"},
+		{&f.health, "CBaseEntity", "m_iHealth"},
 	};
 	for (const auto &field : fields)
 	{
@@ -577,6 +602,8 @@ void Frame()
 			break;
 		}
 		rusher.pushing = pushing ? rusher.pushing + dt : 0.0f;
+		if (pushing) Hurt(slot, pawn, rusher, dt);
+		else rusher.damage_owed = 0.0f;
 		// A caught rusher who keeps pushing keeps the note up; it then lingers for center_seconds.
 		if (rusher.caught && pushing && settings.center_message) rusher.center_until = globals->curtime + settings.center_seconds;
 		if (!settings.callout || rusher.caught || rusher.pushing < settings.callout_seconds) continue;

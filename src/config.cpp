@@ -167,6 +167,8 @@ Settings Parse(std::string_view text, std::vector<std::string> &errors)
 		rush.Color("glow_color_ct", a.glow_color_ct);
 		rush.Bool("center_message", a.center_message);
 		rush.Float("center_seconds", a.center_seconds, 0.0f, 10.0f);
+		rush.Int("damage_per_second", a.damage_per_second, 0, 100);
+		rush.Bool("damage_can_kill", a.damage_can_kill);
 	}
 	return settings;
 }
