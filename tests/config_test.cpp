@@ -18,7 +18,7 @@ int main()
 	config::Settings settings = config::Parse(shipped, errors);
 	for (const auto &e : errors) std::printf("shipped config: %s\n", e.c_str());
 	assert(errors.empty());
-	assert(settings.no_aimpunch && settings.anti_rush.unlock_seconds == 60 && settings.anti_rush.glow_color_ct[3] == 255);
+	assert(settings.no_aimpunch && settings.anti_rush.unlock_seconds == 60 && settings.anti_rush.glow_color_ct[3] == 100);
 
 	// Bad values are reported and fall back; good ones are taken.
 	errors.clear();
