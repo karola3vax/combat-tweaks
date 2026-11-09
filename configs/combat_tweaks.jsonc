@@ -28,7 +28,7 @@
 
     // Barrier walls (the game's retake barrier panels): [red, green, blue, alpha].
     // The panel texture is orange, so this tints it. Alpha 0 hides them; 255 is solid.
-    "line_color": [120, 120, 120, 160],
+    "line_color": [120, 120, 120, 30],
 
     // Wall color while a player is against the barrier.
     "touched_color": [255, 0, 0, 255],

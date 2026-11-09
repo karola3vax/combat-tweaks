@@ -82,7 +82,7 @@ Barriers reach a little below the lower corner and 200 units above the higher on
 | `anti_rush.unlock_seconds` | `60` | Seconds after freeze time before the barrier opens (`0`: no timer) |
 | `anti_rush.unlock_players_left` | `1` | Open as soon as a team has this many players alive, or fewer |
 | `anti_rush.round_messages` | `true` | Tell players in chat when the barrier closes and opens |
-| `anti_rush.line_color` | `[120, 120, 120, 160]` | Barrier walls (the game's retake barrier panels), as `[red, green, blue, alpha]`. The panel texture is orange, so this tints it. Alpha `0` hides them |
+| `anti_rush.line_color` | `[120, 120, 120, 30]` | Barrier walls (the game's retake barrier panels), as `[red, green, blue, alpha]`. The panel texture is orange, so this tints it. Alpha `0` hides them |
 | `anti_rush.touched_color` | `[255, 0, 0, 255]` | Wall color while someone is against the barrier |
 | `anti_rush.callout` | `true` | Name players who keep walking into the barrier, once per round |
 | `anti_rush.callout_seconds` | `0.5` | How long someone must push into it to be named |
