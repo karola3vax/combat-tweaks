@@ -34,9 +34,10 @@ bool Inside(const Box &box, const Vec &point);
 // Locked until the timer ends or either team is down to one living player.
 bool Locked(float seconds_since_round_start, int alive_t, int alive_ct, int unlock_seconds);
 
-// Velocity that pushes a player inside the box out through the nearest side wall
-// (x or y; height is left alone) at least at `push_speed`, keeping their other movement.
-Vec PushOut(const Box &box, const Vec &position, const Vec &velocity, float push_speed);
+// Velocity that makes the box act like a wall for a player overlapping it: movement into the
+// nearest side (x or y; height is left alone) is cancelled, sliding along it is kept, and the
+// player eases back out at `eject_rate` units per second for each unit of overlap.
+Vec Block(const Box &box, const Vec &position, const Vec &velocity, float eject_rate);
 
 // The 12 edges of the box, as start and end points, for drawing.
 std::array<std::array<Vec, 2>, 12> Edges(const Box &box);

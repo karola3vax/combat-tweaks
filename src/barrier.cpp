@@ -34,7 +34,7 @@ namespace
 {
 
 constexpr float kPlayerHalfWidth = 16.0f; // the player's box sticks out this far from its origin
-constexpr float kPushSpeed = 250.0f;
+constexpr float kEjectRate = 10.0f; // per unit of overlap, so a player touching the edge barely moves
 constexpr float kBeamWidth = 1.0f;
 constexpr std::uint8_t kBeamAlpha = 96;          // faint, so the lines don't distract
 constexpr std::uint8_t kRenderTransAlpha = 1;
@@ -171,9 +171,8 @@ void SpawnBeams()
 	for (const anti_rush::Box &box : boxes)
 		for (auto edge : anti_rush::Edges(box))
 		{
-			// Only the floor outline: the full box was too distracting.
-			if (edge[0][2] != box.min[2] || edge[1][2] != box.min[2]) continue;
-			edge[0][2] = edge[1][2] = box.min[2] + 1.0f; // just above the floor, so it doesn't flicker into it
+			for (auto &point : edge)
+				if (point[2] == box.min[2]) point[2] += 1.0f; // just above the floor, so it doesn't flicker into it
 			CEntityInstance *beam = create_entity("beam", -1);
 			if (!beam) continue;
 			auto *end = &schema::Field<float>(beam, f.end_pos);
@@ -344,7 +343,7 @@ void Frame()
 			if (!anti_rush::Inside(box, position)) continue;
 			float *velocity = &schema::Field<float>(pawn, f.velocity);
 			const anti_rush::Vec pushed =
-				anti_rush::PushOut(box, position, {velocity[0], velocity[1], velocity[2]}, kPushSpeed);
+				anti_rush::Block(box, position, {velocity[0], velocity[1], velocity[2]}, kEjectRate);
 			for (int axis = 0; axis < 3; ++axis) velocity[axis] = pushed[axis];
 			break;
 		}

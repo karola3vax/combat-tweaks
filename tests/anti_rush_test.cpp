@@ -34,15 +34,18 @@ int main()
 	assert(!Locked(10, 5, 1, 60));
 	assert(!Locked(10, 5, 0, 60));
 
-	// Came in from the -x side, walking +x: pushed back out through -x, y and z kept.
-	Vec v = PushOut(box, {-90, 0, 10}, {250, 30, 5}, 200);
-	assert(v[0] == -200 && v[1] == 30 && v[2] == 5);
-	// Already leaving faster than the push speed: kept.
-	v = PushOut(box, {95, 0, 10}, {300, 0, 0}, 200);
+	// 10 units in from the -x side, walking +x: inward speed gone, eased out at 10 * 10, y and z kept.
+	Vec v = Block(box, {-90, 0, 10}, {250, 30, 5}, 10);
+	assert(v[0] == -100 && v[1] == 30 && v[2] == 5);
+	// Barely touching while walking along the wall: sliding kept, no bounce.
+	v = Block(box, {-99.5f, 0, 10}, {0, 250, 0}, 10);
+	assert(v[0] == -5 && v[1] == 250);
+	// Already leaving faster than the ease-out: kept.
+	v = Block(box, {95, 0, 10}, {300, 0, 0}, 10);
 	assert(v[0] == 300);
 	// Nearest wall is +y.
-	v = PushOut(box, {0, 45, 10}, {0, -100, 0}, 200);
-	assert(v[1] == 200 && v[0] == 0);
+	v = Block(box, {0, 45, 10}, {0, -100, 0}, 10);
+	assert(v[1] == 50 && v[0] == 0);
 
 	const auto edges = Edges(box);
 	for (const auto &edge : edges)

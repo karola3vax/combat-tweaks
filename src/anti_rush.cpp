@@ -60,7 +60,7 @@ bool Locked(float seconds_since_round_start, int alive_t, int alive_ct, int unlo
 	return seconds_since_round_start < static_cast<float>(unlock_seconds) && alive_t > 1 && alive_ct > 1;
 }
 
-Vec PushOut(const Box &box, const Vec &position, const Vec &velocity, float push_speed)
+Vec Block(const Box &box, const Vec &position, const Vec &velocity, float eject_rate)
 {
 	// Nearest of the four side walls: that is the side the player came in from.
 	int axis = 0;
@@ -76,7 +76,7 @@ Vec PushOut(const Box &box, const Vec &position, const Vec &velocity, float push
 			sign = side % 2 == 0 ? -1.0f : 1.0f;
 		}
 	Vec result = velocity;
-	result[axis] = sign * std::max(push_speed, sign * velocity[axis]);
+	result[axis] = sign * std::max(nearest * eject_rate, sign * velocity[axis]);
 	return result;
 }
 
