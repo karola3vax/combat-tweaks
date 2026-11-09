@@ -11,7 +11,7 @@ A Metamod:Source plugin for Counter-Strike 2 servers that makes fights cleaner a
 - **Anti-rush barriers.**
   - **Closing:** at the start of each round, a faint grey box blocks part of the map like a wall, and lights up red when someone walks into it.
   - **Opening:** it opens after a set time, or once a team is down to its last player.
-  - **Rushers:** a player who keeps pushing into it is named in chat and glows red for a few seconds, seen by everyone.
+  - **Rushers:** a player who keeps pushing into it is named in chat, glows in their team color for a few seconds (seen by everyone), and gets a private note in the middle of their screen.
 - **In-game zone editor.** Admins draw barriers by standing at two corners. No coordinates to type.
 - **9 languages.** Each player gets chat in their own game language: English, Turkish, Russian, Portuguese, Spanish, German, Chinese, Polish and French.
 - **Settings and status.** Every feature can be switched off or tuned in a commented config file, and `ct status` shows what's running.
