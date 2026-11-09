@@ -396,7 +396,7 @@ void SetLocked(bool now_locked, int alive_t, int alive_ct, float round_time)
 		locked ? "locked" : "unlocked", alive_t, alive_ct, round_time);
 	if (!settings.round_messages) return;
 	if (locked)
-		chat::SendAll("barrier_locked", {{"seconds", std::to_string(settings.unlock_seconds)}});
+		chat::SendAll("barrier_locked");
 	else
 		chat::SendAll("barrier_unlocked");
 }

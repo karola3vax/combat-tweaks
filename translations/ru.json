@@ -3,7 +3,7 @@
   "rush_prefix": "{red}[ANTI-RUSH]{default}",
   "admin_prefix": "{lime}[Combat Tweaks]{default}",
   "rush_attempt": "{rush_prefix} {team}{name}{default} пытался зарашить.",
-  "barrier_locked": "{rush_prefix} Раш закрыт на {seconds} сек.",
+  "barrier_locked": "{rush_prefix} Раш закрыт.",
   "barrier_unlocked": "{rush_prefix} Раш открыт.",
   "no_access": "{admin_prefix} Нет доступа.",
   "must_be_alive": "{admin_prefix} Нужно быть живым.",

@@ -3,7 +3,7 @@
   "rush_prefix": "{red}[ANTI-RUSH]{default}",
   "admin_prefix": "{lime}[Combat Tweaks]{default}",
   "rush_attempt": "{rush_prefix} {team}{name}{default} rush atmaya çalıştı.",
-  "barrier_locked": "{rush_prefix} Rush {seconds} sn kapalı.",
+  "barrier_locked": "{rush_prefix} Rush kapalı.",
   "barrier_unlocked": "{rush_prefix} Rush açıldı.",
   "no_access": "{admin_prefix} Yetkin yok.",
   "must_be_alive": "{admin_prefix} Hayatta olmalısın.",

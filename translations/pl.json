@@ -3,7 +3,7 @@
   "rush_prefix": "{red}[ANTI-RUSH]{default}",
   "admin_prefix": "{lime}[Combat Tweaks]{default}",
   "rush_attempt": "{rush_prefix} {team}{name}{default} próbował rushować.",
-  "barrier_locked": "{rush_prefix} Rush zablokowany na {seconds} s.",
+  "barrier_locked": "{rush_prefix} Rush zablokowany.",
   "barrier_unlocked": "{rush_prefix} Rush otwarty.",
   "no_access": "{admin_prefix} Brak dostępu.",
   "must_be_alive": "{admin_prefix} Musisz żyć.",
