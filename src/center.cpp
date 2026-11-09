@@ -6,6 +6,7 @@
 #include <ISmmPlugin.h>
 #include <engine2/igameeventsystem.h>
 #include <igameevents.h>
+#include <tier0/generichash.h>
 #include <networksystem/inetworkmessages.h>
 
 #include "gameevents.pb.h"
@@ -75,6 +76,24 @@ void Send(int slot, const std::string &html)
 		network_messages->DeallocateNetMessageAbstract(type, data);
 	}
 	manager->FreeEvent(event);
+}
+
+void PlaySound(int slot, const char *sound_event)
+{
+	if (!network_messages || !events || slot < 0 || slot >= 64) return;
+	INetworkMessageInternal *type = network_messages->FindNetworkMessageById(GE_SosStartSoundEvent);
+	CNetMessage *data = type ? type->AllocateMessage() : nullptr;
+	auto *message = data ? data->ToPB<CMsgSosStartSoundEvent>() : nullptr;
+	if (message)
+	{
+		static int guid = 0x43540000; // our own range, so it never matches a sound the game started
+		message->set_soundevent_guid(++guid);
+		// The game names sound events by this hash (seed "SRC2").
+		message->set_soundevent_hash(MurmurHash2LowerCase(sound_event, 0x53524332u));
+		OneRecipient recipient(slot);
+		events->PostEventAbstract(-1, false, &recipient, type, data, 0);
+	}
+	if (data) network_messages->DeallocateNetMessageAbstract(type, data);
 }
 
 void Shutdown()

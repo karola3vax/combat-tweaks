@@ -57,7 +57,10 @@
     "damage_can_kill": true,
 
     // Play the game's body-hit sound on each hit, where the player stands.
-    "damage_sound": true
+    "damage_sound": true,
+
+    // Play a warning sound (the buy menu's "denied" buzz) to the rusher when they are caught.
+    "warning_sound": true
   },
 
   // SteamID64s of players allowed to use !ct commands (zone editor, status, reload).

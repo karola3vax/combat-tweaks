@@ -41,6 +41,7 @@ constexpr float kTouchHold = 0.5f;        // seconds a box stays lit after the l
 constexpr std::uint8_t kRenderTransAlpha = 1;
 constexpr std::uint8_t kRenderNone = 2;
 constexpr int kGlowAlways = 3;            // m_iGlowType: through walls
+constexpr const char *kWarningSound = "UIPanorama.buymenu_failure"; // the buy menu's "denied" buzz
 constexpr const char *kHitSound = "Player.DamageBody.Onlooker"; // heard where the player stands
 constexpr float kSoundLife = 2.0f; // seconds before a sound entity is removed
 constexpr float kHitInterval = 0.5f;     // rush damage comes as one hit per this many seconds of pushing
@@ -647,6 +648,7 @@ void Frame()
 		if (!settings.callout || rusher.caught || rusher.pushing < settings.callout_seconds) continue;
 		rusher.caught = true;
 		Announce(Controller(slot));
+		if (settings.warning_sound) center::PlaySound(slot, kWarningSound);
 		if (settings.center_message) rusher.center_until = globals->curtime + settings.center_seconds;
 		if (settings.glow && accept_input)
 		{

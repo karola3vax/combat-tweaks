@@ -170,6 +170,7 @@ Settings Parse(std::string_view text, std::vector<std::string> &errors)
 		rush.Int("damage_per_second", a.damage_per_second, 0, 100);
 		rush.Bool("damage_can_kill", a.damage_can_kill);
 		rush.Bool("damage_sound", a.damage_sound);
+		rush.Bool("warning_sound", a.warning_sound);
 	}
 	return settings;
 }

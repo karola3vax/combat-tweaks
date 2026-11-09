@@ -93,6 +93,7 @@ Barriers reach a little below the lower corner and 200 units above the higher on
 | `anti_rush.center_message` | `true` | Show the rusher a private note in the middle of their screen |
 | `anti_rush.center_seconds` | `5` | How long that note stays after the rusher stops pushing |
 | `anti_rush.damage_per_second` | `50` | Health a player loses each second while pushing into the barrier, as one hit every half second (`0`: off) |
+| `anti_rush.warning_sound` | `true` | Play the buy menu's "denied" buzz to the rusher, only them, when they are caught |
 | `anti_rush.damage_sound` | `true` | Play the game's body-hit sound on each hit, where the player stands |
 | `anti_rush.damage_can_kill` | `true` | Whether that damage may kill; the death counts as a suicide. If `false`, it stops at 1 health |
 | `admins` | `[]` | SteamID64s, in quotes, allowed to use `ct` in game |
