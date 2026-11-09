@@ -39,7 +39,7 @@ constexpr float kPlayerHalfWidth = 16.0f; // the player's box sticks out this fa
 constexpr float kEjectRate = 10.0f;       // per unit of overlap, so a player touching the edge barely moves
 constexpr const char *kPanelModel = "models/retakes/retakes_barrier.vmdl"; // the game's retake barrier
 constexpr float kTouchHold = 0.5f;        // seconds a box stays lit after the last touch
-constexpr float kFadeSeconds = 0.25f;     // the color fades between grey and red over this long
+constexpr float kFadeSeconds = 0.4f;      // the color fades between grey and red over this long
 constexpr std::uint8_t kRenderTransAlpha = 1;
 constexpr std::uint8_t kRenderNone = 2;
 constexpr int kGlowAlways = 3;            // m_iGlowType: through walls
@@ -232,6 +232,7 @@ bool BeamsAlive()
 // Paints a box between the line color (heat 0) and the touched color (heat 1).
 void PaintBox(std::size_t box, float level)
 {
+	level = level * level * (3.0f - 2.0f * level); // ease in and out, so the fade has no hard start or stop
 	config::Rgba rgba;
 	for (int i = 0; i < 4; ++i)
 		rgba[i] = static_cast<std::uint8_t>(settings.line_color[i] + (settings.touched_color[i] - settings.line_color[i]) * level + 0.5f);
