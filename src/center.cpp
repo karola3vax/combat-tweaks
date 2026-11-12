@@ -73,7 +73,7 @@ void Send(int slot, const std::string &html)
 		manager->SerializeEvent(event, data->ToPB<CMsgSource1LegacyGameEvent>());
 		OneRecipient recipient(slot);
 		events->PostEventAbstract(-1, false, &recipient, type, data, 0);
-		network_messages->DeallocateNetMessageAbstract(type, data);
+		delete data; // CS2 2000943: the message's own destructor frees it
 	}
 	manager->FreeEvent(event);
 }
@@ -93,7 +93,7 @@ void PlaySound(int slot, const char *sound_event)
 		OneRecipient recipient(slot);
 		events->PostEventAbstract(-1, false, &recipient, type, data, 0);
 	}
-	if (data) network_messages->DeallocateNetMessageAbstract(type, data);
+	delete data;
 }
 
 void Shutdown()

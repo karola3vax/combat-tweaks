@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Fixed for CS2 build 2000943, which changed how the game builds network messages. Chat messages, center-screen notes, warning sounds and the game language check use the new layout. 1.0.0 does not work on this build.
+
 ## 1.0.0
 
 First public release.

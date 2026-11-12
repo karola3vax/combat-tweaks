@@ -1,6 +1,7 @@
 #include "chat.h"
 
 #include "messages.h"
+#include "net_message.h"
 #include "player_language.h"
 #include "recipient.h"
 
@@ -45,7 +46,7 @@ bool IsPlayer(int slot)
 void Post(int slot, int destination, const std::string &text)
 {
 	if (!ready || slot < 0 || slot >= 64) return;
-	INetworkMessageInternal *type = network_messages->FindNetworkMessagePartial("TextMsg");
+	INetworkMessageInternal *type = FindNetMessage(network_messages, UM_TextMsg, "CUserMessageTextMsg");
 	CNetMessage *data = type ? type->AllocateMessage() : nullptr;
 	auto *message = data ? data->ToPB<CUserMessageTextMsg>() : nullptr;
 	if (message)
@@ -55,7 +56,7 @@ void Post(int slot, int destination, const std::string &text)
 		OneRecipient recipient(slot);
 		events->PostEventAbstract(0, false, &recipient, type, data, 0);
 	}
-	if (data) network_messages->DeallocateNetMessageAbstract(type, data);
+	delete data;
 }
 
 // For the server console: no color bytes and no leading space.

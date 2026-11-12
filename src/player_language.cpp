@@ -1,6 +1,7 @@
 #include "player_language.h"
 
 #include "messages.h"
+#include "net_message.h"
 
 #include <ISmmPlugin.h>
 #include <engine2/igameeventsystem.h>
@@ -145,7 +146,7 @@ void Query(int slot)
 		if (player.client != client) player = {}; // someone else has the slot now
 		if (!player.file.empty() || (player.cookie != 0 && now - player.asked < kRetry)) return;
 	}
-	if (!get_cvar) get_cvar = net_messages->FindNetworkMessagePartial("CSVCMsg_GetCvarValue");
+	if (!get_cvar) get_cvar = FindNetMessage(net_messages, svc_GetCvarValue, "CSVCMsg_GetCvarValue");
 	if (!get_cvar) return;
 	if (!hooked_vtable)
 	{
@@ -167,7 +168,7 @@ void Query(int slot)
 	query->set_cvar_name(kCvar);
 	OnePlayer filter(slot);
 	events->PostEventAbstract(0, false, &filter, get_cvar, message, 0);
-	net_messages->DeallocateNetMessageAbstract(get_cvar, message);
+	delete message;
 }
 
 std::string Get(int slot)
