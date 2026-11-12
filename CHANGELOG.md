@@ -3,6 +3,7 @@
 ## 1.0.1
 
 - Fixed for CS2 build 2000943, which changed how the game builds network messages. Chat messages, center-screen notes, warning sounds and the game language check use the new layout. 1.0.0 does not work on this build.
+- A game setting the plugin cannot find no longer stops the plugin from loading. Only that setting is off, the plugin tries again every second, and `ct status` names it.
 
 ## 1.0.0
 

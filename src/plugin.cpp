@@ -44,6 +44,7 @@ struct Setting
 	float original = 0.0f;
 	std::uint64_t stripped = 0;
 	bool active = false; // this plugin currently owns the value
+	bool reported = false; // the console was told the convar is missing
 };
 
 config::Settings g_config;
@@ -141,11 +142,21 @@ CEntityInstance *Pawn(int slot)
 }
 
 // Takes over the convars of switched-on features and hands back those of switched-off ones.
-void ApplySettings()
+// A convar that cannot be found yet only turns its own setting off; the next call tries again.
+void ApplySettings(bool report_missing)
 {
 	for (Setting &setting : g_settings)
 	{
 		ConVarRefAbstract convar(setting.name, true);
+		if (!convar.IsValidRef() || !convar.IsConVarDataAvailable())
+		{
+			if (report_missing && *setting.enabled && !setting.reported)
+			{
+				META_CONPRINTF("[COMBAT_TWEAKS] CS2 has no convar %s yet; that setting is off until it does.\n", setting.name);
+				setting.reported = true;
+			}
+			continue;
+		}
 		if (*setting.enabled && !setting.active)
 		{
 			setting.original = convar.GetFloat();
@@ -182,7 +193,7 @@ void LoadConfig()
 void Reload()
 {
 	LoadConfig();
-	ApplySettings();
+	ApplySettings(false);
 	if (g_barrier_ready)
 	{
 		barrier::Configure(g_config.anti_rush);
@@ -201,6 +212,8 @@ void Status(std::vector<std::string> &lines)
 	std::snprintf(line, sizeof(line), "No aimpunch: %s; no slowdown: %s; hide ragdolls: %s; short decals: %s",
 		on(g_config.no_aimpunch), on(g_config.no_slowdown), on(g_config.hide_ragdolls), on(g_config.short_decals));
 	lines.push_back(line);
+	for (const Setting &setting : g_settings)
+		if (*setting.enabled && !setting.active) lines.push_back(std::string("Not applied, CS2 has no convar ") + setting.name);
 	if (g_barrier_ready) barrier::Status(lines);
 	else lines.push_back("Anti-rush: unavailable, " + g_barrier_error);
 	chat::Status(lines);
@@ -253,17 +266,9 @@ bool CombatTweaks::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, 
 #ifdef COMBAT_TWEAKS_TRACE
 	if (!trace::Init(scope, error, maxlen)) return false;
 #endif
-	for (const Setting &setting : g_settings)
-	{
-		ConVarRefAbstract convar(setting.name, true);
-		if (convar.IsValidRef() && convar.IsConVarDataAvailable()) continue;
-		std::snprintf(error, maxlen, "CS2 no longer has the convar %s", setting.name);
-		return false;
-	}
-
 	g_directory = std::string(ismm->GetBaseDir()) + "/addons/combat_tweaks";
 	LoadConfig();
-	ApplySettings();
+	ApplySettings(false); // the game frame tries again for convars that are not there yet
 	g_chat_ready = chat::Init(g_directory + "/translations");
 	if (!g_chat_ready) META_CONPRINTF("[COMBAT_TWEAKS] Chat messages are off: this CS2 version changed how they are sent.\n");
 	if (!center::Init(server_)) META_CONPRINTF("[COMBAT_TWEAKS] Rusher center notes are off: CS2 changed its event manager.\n");
@@ -307,9 +312,10 @@ bool CombatTweaks::Unload(char *, size_t)
 	{
 		if (!setting.active) continue;
 		ConVarRefAbstract convar(setting.name, true);
+		setting.active = false;
+		if (!convar.IsValidRef() || !convar.IsConVarDataAvailable()) continue;
 		convar.SetFloat(setting.original);
 		convar.AddFlags(setting.stripped);
-		setting.active = false;
 	}
 	return true;
 }
@@ -346,7 +352,7 @@ KHook::Return<void> CombatTweaks::OnGameFrame(IServerGameDLL *, bool simulating,
 		next_settings_check_ = now + std::chrono::seconds(1);
 #ifndef COMBAT_TWEAKS_TRACE // the trace build leaves the settings alone so a test can compare values
 		// Map changes and game mode configs write these back (Valve's deathmatch config sets the decal one).
-		ApplySettings();
+		ApplySettings(true);
 #endif
 		update_check::Frame();
 	}
