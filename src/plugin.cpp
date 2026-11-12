@@ -45,6 +45,7 @@ struct Setting
 	std::uint64_t stripped = 0;
 	bool active = false; // this plugin currently owns the value
 	bool reported = false; // the console was told the convar is missing
+	ConVarRef ref;          // found once, then kept
 };
 
 config::Settings g_config;
@@ -141,13 +142,28 @@ CEntityInstance *Pawn(int slot)
 	return entities->GetEntityInstance(schema::Field<CEntityHandle>(controller, g_pawn_offset));
 }
 
+// tier0's FindConVar never returns an FCVAR_DEVELOPMENTONLY convar for `true`, and for `false` only one that is
+// also FCVAR_DEFENSIVE (CCvar slot 11, 2000943 libtier0 0x159a08). mp_flinch_punch_scale is developer-only and
+// not defensive, so walk the convar list by index, as CS2Fixes does (src/cvars.cpp).
+ConVarRef FindConVarAnyFlags(const char *name)
+{
+	for (ConVarRefAbstract ref(ConVarRef(static_cast<uint16>(0))); ref.IsValidRef();
+		ref = ConVarRefAbstract(ConVarRef(static_cast<uint16>(ref.GetAccessIndex() + 1))))
+	{
+		const char *found = ref.IsConVarDataAvailable() ? ref.GetName() : nullptr;
+		if (found && std::strcmp(found, name) == 0) return ref;
+	}
+	return ConVarRef();
+}
+
 // Takes over the convars of switched-on features and hands back those of switched-off ones.
 // A convar that cannot be found yet only turns its own setting off; the next call tries again.
 void ApplySettings(bool report_missing)
 {
 	for (Setting &setting : g_settings)
 	{
-		ConVarRefAbstract convar(setting.name, true);
+		if (!setting.ref.IsValidRef()) setting.ref = FindConVarAnyFlags(setting.name);
+		ConVarRefAbstract convar(setting.ref);
 		if (!convar.IsValidRef() || !convar.IsConVarDataAvailable())
 		{
 			if (report_missing && *setting.enabled && !setting.reported)
@@ -311,7 +327,7 @@ bool CombatTweaks::Unload(char *, size_t)
 	for (Setting &setting : g_settings)
 	{
 		if (!setting.active) continue;
-		ConVarRefAbstract convar(setting.name, true);
+		ConVarRefAbstract convar(setting.ref);
 		setting.active = false;
 		if (!convar.IsValidRef() || !convar.IsConVarDataAvailable()) continue;
 		convar.SetFloat(setting.original);

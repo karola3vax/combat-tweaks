@@ -4,6 +4,7 @@
 
 - Fixed for CS2 build 2000943, which changed how the game builds network messages. Chat messages, center-screen notes, warning sounds and the game language check use the new layout. 1.0.0 does not work on this build.
 - A game setting the plugin cannot find no longer stops the plugin from loading. Only that setting is off, the plugin tries again every second, and `ct status` names it.
+- No aimpunch and short decals work without CounterStrikeSharp. The plugin now finds the game's hidden developer settings itself; before, they were found only while CounterStrikeSharp was loaded, because it unhides them.
 
 ## 1.0.0
 
