@@ -10,7 +10,7 @@ template <class Messages>
 auto *FindNetMessage(Messages *messages, int id, const char *type)
 {
 	auto *found = messages ? messages->FindNetworkMessageById(id) : nullptr;
-	const char *name = found ? found->GetUnscopedName() : nullptr;
+	const char *name = found ? found->GetName() : nullptr;
 	const size_t length = std::strlen(type);
 	const bool match = name && std::strncmp(name, type, length) == 0 && name[length] == ' ' && name[length + 1] == '[';
 	return match ? found : nullptr;

@@ -21,7 +21,7 @@ A Metamod:Source plugin for Counter-Strike 2 servers that makes fights cleaner a
 ## Requirements
 
 - A Counter-Strike 2 dedicated server
-- Metamod:Source 2.0.0 build 1469 or newer
+- Metamod:Source 2.0.0 build 1469 or newer; build 1490 or newer is recommended (it fixes Metamod's own plugin-unload bugs)
 
 ## Installation
 

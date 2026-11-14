@@ -8,7 +8,7 @@
 struct Type
 {
 	const char *name;
-	const char *GetUnscopedName() const { return name; }
+	const char *GetName() const { return name; }
 };
 
 struct Messages

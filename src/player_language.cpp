@@ -60,7 +60,7 @@ INetworkServerService *network = nullptr;
 INetworkMessages *net_messages = nullptr;
 IGameEventSystem *events = nullptr;
 IVEngineServer2 *engine = nullptr;
-INetworkMessageInternal *get_cvar = nullptr;
+NetMessageInfo_t *get_cvar = nullptr;
 void **hooked_vtable = nullptr;
 std::mt19937 random_cookie {std::random_device {}()};
 

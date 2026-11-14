@@ -63,7 +63,7 @@ void Send(int slot, const std::string &html)
 	// Not forced: with nobody listening the game returns nothing and nothing is sent.
 	IGameEvent *event = manager->CreateEvent("show_survival_respawn_status");
 	if (!event) return;
-	INetworkMessageInternal *type = network_messages->FindNetworkMessageById(GE_Source1LegacyGameEvent);
+	NetMessageInfo_t *type = network_messages->FindNetworkMessageById(GE_Source1LegacyGameEvent);
 	CNetMessage *data = type ? type->AllocateMessage() : nullptr;
 	if (data)
 	{
@@ -81,7 +81,7 @@ void Send(int slot, const std::string &html)
 void PlaySound(int slot, const char *sound_event)
 {
 	if (!network_messages || !events || slot < 0 || slot >= 64) return;
-	INetworkMessageInternal *type = network_messages->FindNetworkMessageById(GE_SosStartSoundEvent);
+	NetMessageInfo_t *type = network_messages->FindNetworkMessageById(GE_SosStartSoundEvent);
 	CNetMessage *data = type ? type->AllocateMessage() : nullptr;
 	auto *message = data ? data->ToPB<CMsgSosStartSoundEvent>() : nullptr;
 	if (message)

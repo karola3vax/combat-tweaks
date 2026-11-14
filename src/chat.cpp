@@ -46,7 +46,7 @@ bool IsPlayer(int slot)
 void Post(int slot, int destination, const std::string &text)
 {
 	if (!ready || slot < 0 || slot >= 64) return;
-	INetworkMessageInternal *type = FindNetMessage(network_messages, UM_TextMsg, "CUserMessageTextMsg");
+	NetMessageInfo_t *type = FindNetMessage(network_messages, UM_TextMsg, "CUserMessageTextMsg");
 	CNetMessage *data = type ? type->AllocateMessage() : nullptr;
 	auto *message = data ? data->ToPB<CUserMessageTextMsg>() : nullptr;
 	if (message)
