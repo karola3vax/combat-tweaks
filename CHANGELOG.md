@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+- Built against Metamod:Source 2.0.0 build 1490 and the current s2sdk, which now has the network message layout of CS2 build 2000943. The plugin no longer carries its own copy of that change.
+- It still loads on Metamod 2.0.0 build 1469 and newer; build 1490 or newer is recommended, because it fixes Metamod's own plugin-unload bugs.
+- Nothing changes in game.
+
 ## 1.0.1
 
 - Fixed for CS2 build 2000943, which changed how the game builds network messages. Chat messages, center-screen notes, warning sounds and the game language check use the new layout. 1.0.0 does not work on this build.
