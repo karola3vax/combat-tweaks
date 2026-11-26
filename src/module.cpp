@@ -1,7 +1,9 @@
 #include "module.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <optional>
 #include <string>
 
@@ -26,10 +28,30 @@ std::vector<const std::uint8_t *> FindAll(const std::vector<Segment> &segments, 
 	{
 		if (length > segment.size) continue;
 		const std::uint8_t *end = segment.start + segment.size - length;
+		const std::uint8_t first = *static_cast<const std::uint8_t *>(needle);
 		for (const std::uint8_t *at = segment.start; at <= end; at += alignment)
-			if (std::memcmp(at, needle, length) == 0) hits.push_back(at);
+		{
+			// Jump to the first aligned position at or after the next copy of the first byte.
+			const auto *hit = static_cast<const std::uint8_t *>(std::memchr(at, first, static_cast<std::size_t>(end - at) + 1));
+			if (!hit) break;
+			at += (static_cast<std::size_t>(hit - at) + alignment - 1) / alignment * alignment;
+			if (at > end) break;
+			if (*at == first && std::memcmp(at, needle, length) == 0) hits.push_back(at);
+		}
 	}
 	return hits;
+}
+
+// The first place in [from, to) where all of `needle` fits, or nullptr.
+const std::uint8_t *Search(const std::uint8_t *from, const std::uint8_t *to, const std::uint8_t *needle, std::size_t length)
+{
+	if (from > to || static_cast<std::size_t>(to - from) < length) return nullptr;
+#ifdef _WIN32
+	const std::uint8_t *hit = std::search(from, to, std::boyer_moore_horspool_searcher(needle, needle + length));
+	return hit == to ? nullptr : hit;
+#else
+	return static_cast<const std::uint8_t *>(memmem(from, static_cast<std::size_t>(to - from), needle, length));
+#endif
 }
 
 template <typename T>
@@ -95,6 +117,38 @@ void *FindUnique(const std::vector<Segment> &segments, const char *pattern)
 	}
 	void *found = nullptr;
 	int count = 0;
+	// Anchor on the longest run of fixed bytes: find it fast, then check the whole pattern around each hit.
+	std::size_t run_offset = 0, run_length = 0;
+	for (std::size_t i = 0, j = 0; i < bytes.size(); i = j + 1)
+	{
+		for (j = i; j < bytes.size() && bytes[j]; ++j) {}
+		if (j - i > run_length) run_offset = i, run_length = j - i;
+	}
+	if (run_length)
+	{
+		std::vector<std::uint8_t> run;
+		for (std::size_t i = 0; i < run_length; ++i) run.push_back(*bytes[run_offset + i]);
+		for (const Segment &segment : segments)
+		{
+			if (bytes.size() > segment.size) continue;
+			// Only run positions whose whole pattern fits inside the segment.
+			const std::uint8_t *from = segment.start + run_offset;
+			const std::uint8_t *to = segment.start + segment.size - (bytes.size() - run_offset - run_length);
+			while (const std::uint8_t *hit = Search(from, to, run.data(), run_length))
+			{
+				const std::uint8_t *at = hit - run_offset;
+				std::size_t i = 0;
+				while (i < bytes.size() && (!bytes[i] || at[i] == *bytes[i])) ++i;
+				if (i == bytes.size())
+				{
+					if (++count == 2) return nullptr;
+					found = const_cast<std::uint8_t *>(at);
+				}
+				from = hit + 1;
+			}
+		}
+		return found;
+	}
 	for (const Segment &segment : segments)
 	{
 		if (bytes.size() > segment.size) continue;
